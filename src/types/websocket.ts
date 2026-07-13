@@ -36,6 +36,7 @@ export type WSServerEvent =
   | 'monitoring:message_delete'
   | 'monitoring:message_mention'
   | 'monitoring:media'
+  | 'keyword-alert:match'
   | 'pong'
   | 'error'
 

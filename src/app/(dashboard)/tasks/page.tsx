@@ -26,6 +26,7 @@ import {
   MicOff,
   VolumeX,
   Users,
+  MessageSquare,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api-client"
@@ -37,6 +38,7 @@ const TOOL_META: Record<string, { name: string; icon: React.ReactNode; color: st
   "limpar-dm": { name: "Limpar DM", icon: <Trash size={16} />, color: "text-red-400" },
   "limpar-dms-abertas": { name: "Limpar DMs Abertas", icon: <Trash size={16} />, color: "text-red-400" },
   "limpar-package": { name: "Limpar Package", icon: <Package size={16} />, color: "text-orange-400" },
+  "abrir-dms": { name: "Abrir DMs", icon: <MessageSquare size={16} />, color: "text-primary" },
   "fechar-dms": { name: "Fechar DMs", icon: <PhoneOff size={16} />, color: "text-yellow-400" },
   "remover-amigos": { name: "Remover Amigos", icon: <UserMinus size={16} />, color: "text-pink-400" },
   "remover-servidores": { name: "Sair de Servidores", icon: <LogOut size={16} />, color: "text-purple-400" },

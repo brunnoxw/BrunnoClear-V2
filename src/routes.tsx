@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react'
 import LayoutDashboard from './app/(dashboard)/layout'
 
 const Home = lazy(() => import('./app/(dashboard)/page'))
+const Alertas = lazy(() => import('./app/(dashboard)/alertas/page'))
 const Analytics = lazy(() => import('./app/(dashboard)/analytics/page'))
 const Backups = lazy(() => import('./app/(dashboard)/backups/page'))
 const ClonarServidor = lazy(() => import('./app/(dashboard)/clonar-servidor/page'))
@@ -17,6 +18,7 @@ const LimparDm = lazy(() => import('./app/(dashboard)/limpar-dm/page'))
 const LimparDmAmigos = lazy(() => import('./app/(dashboard)/limpar-dm-amigos/page'))
 const LimparDms = lazy(() => import('./app/(dashboard)/limpar-dms/page'))
 const LimparPackage = lazy(() => import('./app/(dashboard)/limpar-package/page'))
+const AbrirDms = lazy(() => import('./app/(dashboard)/abrir-dms/page'))
 const ListarCall = lazy(() => import('./app/(dashboard)/listar-call/page'))
 const Monitoramento = lazy(() => import('./app/(dashboard)/monitoramento/page'))
 const MonitoramentoConfig = lazy(() => import('./app/(dashboard)/monitoramento/config/page'))
@@ -56,6 +58,7 @@ export function AppRoutes() {
       <Routes>
         <Route element={<LayoutDashboard />}>
           <Route index element={<Home />} />
+          <Route path="alertas" element={<Alertas />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="backups" element={<Backups />} />
           <Route path="clonar-servidor" element={<ClonarServidor />} />
@@ -70,6 +73,7 @@ export function AppRoutes() {
           <Route path="limpar-dm-amigos" element={<LimparDmAmigos />} />
           <Route path="limpar-dms" element={<LimparDms />} />
           <Route path="limpar-package" element={<LimparPackage />} />
+          <Route path="abrir-dms" element={<AbrirDms />} />
           <Route path="listar-call" element={<ListarCall />} />
           <Route path="monitoramento" element={<Monitoramento />} />
           <Route path="monitoramento/config" element={<MonitoramentoConfig />} />

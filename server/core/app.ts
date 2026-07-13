@@ -9,6 +9,7 @@ import { stats } from '../services/stats.service'
 import { refreshAllAvatars } from '../services/avatar-cache.service'
 import { initRPC, updatePresence } from '../services/rpc.service'
 import { monitoringService } from '../features/monitoring/monitoring.service'
+import { initKeywordAlerts, keywordAlertsEmitter } from '../features/keyword-alerts'
 import { wsManager } from './websocket'
 import { logger } from './logger'
 import { taskManager } from '../services/task-manager.service'
@@ -68,6 +69,11 @@ export function createApiServer() {
 
   storage.init()
   stats.load()
+
+  keywordAlertsEmitter.on('match', (match) => {
+    wsManager.broadcast('keyword-alert:match', match)
+  })
+  initKeywordAlerts()
 
   refreshAllAvatars().catch((err) => {
     logger.warn('Server', `Erro ao atualizar avatares no startup: ${err}`)

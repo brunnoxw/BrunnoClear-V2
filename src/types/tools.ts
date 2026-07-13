@@ -25,6 +25,7 @@ export type ToolType =
   | 'limpar-dm'
   | 'backup'
   | 'limpar-package'
+  | 'abrir-dms'
   | 'limpar-dms-abertas'
   | 'remover-amigos'
   | 'remover-servidores'
@@ -63,6 +64,15 @@ export interface LimparPackageConfig {
   fazerBackup: boolean
   salvarMidiaLocal: boolean
   continuar: boolean
+}
+
+export interface AbrirDmsConfig {
+  tokenId: string
+  modo: 'especifico' | 'package'
+  targetIds?: string[]
+  zipPath?: string
+  whitelist?: string[]
+  delay: number
 }
 
 export interface LimparDmsAbertasConfig {

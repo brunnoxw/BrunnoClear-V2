@@ -23,6 +23,22 @@ class DiscordService {
   private activeToken: string | null = null
   private selectedTokenId: string | null = null
   private currentPlatform: string = 'desktop'
+  private clientChangeListeners: Array<(client: any | null) => void> = []
+
+  /**
+   * Registra um callback chamado sempre que o client ativo muda
+   * (nova conexão ou desconexão). Útil para listeners persistentes que
+   * precisam se reanexar ao trocar de conta.
+   */
+  onActiveClientChange(cb: (client: any | null) => void): void {
+    this.clientChangeListeners.push(cb)
+  }
+
+  private emitClientChange(client: any | null): void {
+    for (const cb of this.clientChangeListeners) {
+      try { cb(client) } catch (err) { logger.warn('Discord', `Erro em listener de client change: ${err}`) }
+    }
+  }
 
   async fetchUserInfo(token: string): Promise<DiscordUser | null> {
     try {
@@ -149,6 +165,7 @@ class DiscordService {
     this.activeClient = client
     this.activeToken = token
     logger.info('Discord', `Client conectado: ${client.user.username}`)
+    this.emitClientChange(client)
 
     const u = client.user
     return {
@@ -168,6 +185,7 @@ class DiscordService {
       this.activeClient = null
       this.activeToken = null
       logger.info('Discord', `Client desconectado: ${username}`)
+      this.emitClientChange(null)
     }
   }
 

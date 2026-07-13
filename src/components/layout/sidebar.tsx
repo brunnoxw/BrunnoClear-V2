@@ -46,6 +46,7 @@ import {
   Radio,
   Headphones,
   Crosshair,
+  BellRing,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -91,6 +92,7 @@ const secoesMenu: SecaoMenu[] = [
       { titulo: "Limpar DM dos Amigos", icone: <Trash2 size={16} />, href: "/limpar-dm-amigos" },
       { titulo: "Limpar DMs Abertas", icone: <Trash2 size={16} />, href: "/limpar-dms" },
       { titulo: "Limpar Package", icone: <Package size={16} />, href: "/limpar-package" },
+      { titulo: "Abrir DMs", icone: <MessageSquare size={16} />, href: "/abrir-dms" },
       { titulo: "Fechar DMs", icone: <PhoneOff size={16} />, href: "/fechar-dms" },
     ],
   },
@@ -138,6 +140,7 @@ const secoesMenu: SecaoMenu[] = [
     icone: <Eye size={16} />,
     itens: [
       { titulo: "Dashboard", icone: <Radio size={16} />, href: "/monitoramento" },
+      { titulo: "Alertas", icone: <BellRing size={16} />, href: "/alertas" },
       { titulo: "Configuração", icone: <Settings size={16} />, href: "/monitoramento/config" },
     ],
   },

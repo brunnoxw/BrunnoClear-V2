@@ -43,6 +43,7 @@ export const HTTP_STATUS = {
 export const TOOL_NAMES: Record<string, string> = {
   'limpar-dm': 'Limpar DM',
   'limpar-package': 'Limpar Package',
+  'abrir-dms': 'Abrir DMs',
   'limpar-dms-abertas': 'Limpar DMs Abertas',
   'remover-amigos': 'Remover Amigos',
   'remover-servidores': 'Remover Servidores',

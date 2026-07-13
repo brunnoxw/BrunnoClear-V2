@@ -225,6 +225,7 @@ const PAGE_PRESENCE: Record<string, { details: string; state?: string }> = {
   '/clonar-servidor': { details: 'Clonar Servidor', state: 'Clonagem de servidor' },
   '/scraper-icones': { details: 'Scraper Ícones', state: 'Coletando imagens' },
   '/limpar-package': { details: 'Limpar Package', state: 'Limpando dados exportados' },
+  '/abrir-dms': { details: 'Abrir DMs', state: 'Abrindo conversas' },
   '/prefix-commands': { details: 'Comandos Prefix', state: 'Gerenciando comandos' },
   '/farm-call': { details: 'Farm Call', state: 'Preparando farm' },
   '/elevador': { details: 'Elevador', state: 'Ferramenta de call' },
@@ -388,6 +389,9 @@ function setupTaskListeners() {
     } else if (tool === 'limpar-package') {
       details = `Package - ${pct}%`
       state = `${progress}/${total} DMs processadas`
+    } else if (tool === 'abrir-dms') {
+      details = `Abrir DMs - ${pct}%`
+      state = `${progress}/${total} DMs abertas`
     }
 
     if (details) {

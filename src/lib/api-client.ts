@@ -164,6 +164,11 @@ class ApiClient {
     return this.get(`/tools/monitoring/users/${userId}/interactions`)
   }
 
+  getKeywordAlerts() { return this.get('/tools/keyword-alerts') }
+  updateKeywordAlerts(patch: unknown) { return this.patch('/tools/keyword-alerts/config', patch) }
+  getKeywordAlertHistory() { return this.get('/tools/keyword-alerts/history') }
+  clearKeywordAlertHistory() { return this.delete('/tools/keyword-alerts/history') }
+
   getStatus() { return this.get('/status') }
   getLogs(limit?: number) { return this.get(`/logs${limit ? `?limit=${limit}` : ''}`) }
   clearLogs() { return this.delete('/logs') }
