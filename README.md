@@ -168,6 +168,37 @@ O BrunnoClear V2 é uma aplicação desktop que centraliza **mais de 20 ferramen
 
 <br>
 
+## 🛡️ "O Windows / antivírus detectou como vírus"
+
+> [!IMPORTANT]
+> Isso é um **falso positivo**. O BrunnoClear **não é um vírus** — é open source, roda 100% localmente e você pode auditar todo o código aqui no repositório.
+
+Ao instalar, é normal aparecer um aviso do **Windows SmartScreen** ("Editor desconhecido") ou o **Windows Defender / antivírus** sinalizar o `.exe`. Isso acontece por motivos técnicos, não porque o app é malicioso:
+
+- 🖊️ **O executável não é assinado digitalmente.** Sem uma assinatura de código, o Windows mostra "Editor desconhecido" e trata o arquivo com desconfiança.
+- ⚙️ **É um app Electron empacotado (NSIS).** Muitos malwares também usam Electron/NSIS, então os antivírus marcam esse formato por heurística — pega legítimos junto.
+- 🔍 **A natureza da ferramenta.** Ler tokens do Discord, automatizar ações e acessar arquivos do sistema dispara heurísticas de comportamento, mesmo sendo tudo legítimo.
+- 🆕 **Builds novas não têm "reputação".** Cada release nova começa do zero no SmartScreen e só deixa de ser sinalizada depois de acumular downloads.
+
+### 💳 Por que não é simplesmente assinado?
+
+O que faz o Windows parar de marcar é um **Certificado de Assinatura de Código (code signing)** — uma espécie de "licença" paga e **anual** emitida por autoridades certificadoras (Sectigo, DigiCert, etc.). O problema é o **custo**:
+
+| Tipo de certificado | Preço aproximado | Efeito |
+|:--|:--|:--|
+| **OV** (Organization Validation) | **~R$ 400 – R$ 2.000 / ano** | Remove o "Editor desconhecido", mas a reputação no SmartScreen ainda leva tempo pra construir |
+| **EV** (Extended Validation) | **~R$ 1.500 – R$ 4.000 / ano** | Confiança **imediata** no SmartScreen, mas exige token físico/HSM e validação de empresa |
+
+Ou seja: é um gasto recorrente alto para um projeto **gratuito**. Por isso o app segue sem assinatura por enquanto — o dinheiro não justifica travar um projeto open source.
+
+### ✅ Como instalar mesmo assim
+
+1. No aviso do SmartScreen, clique em **"Mais informações" → "Executar assim mesmo"**.
+2. Se o Defender colocar em quarentena, adicione uma **exclusão**: `Segurança do Windows → Proteção contra vírus e ameaças → Gerenciar configurações → Exclusões → Adicionar`.
+3. **Baixe SEMPRE dos [releases oficiais](https://github.com/brunnoxw/BrunnoClear-V2/releases).** Um arquivo vindo de Discord/Telegram pode ser realmente malicioso — aí o alerta seria de verdade.
+
+<br>
+
 ## ❓ FAQ
 
 <details>
