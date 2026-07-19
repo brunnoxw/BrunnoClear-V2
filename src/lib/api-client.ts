@@ -98,7 +98,9 @@ class ApiClient {
   }
   getRpcAppInfo(appId: string) { return this.get(`/rpc/app-info/${appId}`) }
 
-  getAnalytics() { return this.get('/analytics') }
+  getAnalytics(account?: string) {
+    return this.get(account && account !== 'all' ? `/analytics?account=${encodeURIComponent(account)}` : '/analytics')
+  }
   getMonitoringAggregate() { return this.get('/tools/monitoring/aggregate') }
 
   getMonitoringStatus() { return this.get('/tools/monitoring/status') }

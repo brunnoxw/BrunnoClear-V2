@@ -11,8 +11,9 @@ const router = Router()
  * Retorna os dados analíticos de uso
  * @returns {Object} Estatísticas e métricas do painel
  */
-router.get('/', (_req, res) => {
-  const data = stats.getAnalytics()
+router.get('/', (req, res) => {
+  const account = typeof req.query.account === 'string' ? req.query.account : undefined
+  const data = stats.getAnalytics(account)
   res.json({ success: true, data, timestamp: new Date().toISOString() })
 })
 

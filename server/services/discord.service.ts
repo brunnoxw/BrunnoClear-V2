@@ -197,6 +197,15 @@ class DiscordService {
     return this.activeToken
   }
 
+  getActiveAccount(): { id: string; username: string; avatarUrl: string | null } | null {
+    const u = this.activeClient?.user
+    if (!u || this.activeClient?.isReady?.() !== true) return null
+    const avatarUrl = u.avatar
+      ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.${u.avatar.startsWith('a_') ? 'gif' : 'png'}?size=64`
+      : null
+    return { id: u.id, username: u.username, avatarUrl }
+  }
+
   setSelectedTokenId(id: string | null): void {
     this.selectedTokenId = id
   }

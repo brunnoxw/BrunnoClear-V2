@@ -27,11 +27,15 @@ import {
   Mic,
   Globe,
   ArrowUpDown,
+  ChevronDown,
+  Check,
+  Package,
 } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis, Bar, BarChart } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { api } from "@/lib/api-client"
 
 interface CleanupRecord {
@@ -43,6 +47,10 @@ interface CleanupRecord {
   messagesScanned: number
   duration: number
   date: string
+  source?: string
+  accountId?: string
+  accountUsername?: string
+  accountAvatar?: string | null
 }
 
 interface ToolActionRecord {
@@ -51,6 +59,18 @@ interface ToolActionRecord {
   date: string
   duration: number
   details: Record<string, number | string>
+  accountId?: string
+  accountUsername?: string
+  accountAvatar?: string | null
+}
+
+interface AccountSummary {
+  id: string
+  username: string
+  avatar: string | null
+  cleanups: number
+  actions: number
+  messagesDeleted: number
 }
 
 interface AnalyticsData {
@@ -60,6 +80,17 @@ interface AnalyticsData {
   totalTimeSpent: number
   cleanups: CleanupRecord[]
   toolActions: ToolActionRecord[]
+  accounts: AccountSummary[]
+  scope: string
+}
+
+interface AccountOption {
+  id: string
+  username: string
+  avatarUrl: string | null
+  connected: boolean
+  cleanups: number
+  actions: number
 }
 
 interface MonitoringAggregate {
@@ -240,17 +271,155 @@ function ChartToggle({ chartType, setChartType }: { chartType: "bar" | "line"; s
   )
 }
 
+function AccountSelector({ accounts, selected, onSelect, busy }: {
+  accounts: AccountOption[]
+  selected: string
+  onSelect: (id: string) => void
+  busy: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const current = accounts.find((a) => a.id === selected)
+  const totalCleanups = accounts.reduce((s, a) => s + a.cleanups, 0)
+  const totalActions = accounts.reduce((s, a) => s + a.actions, 0)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="group flex items-center gap-2.5 rounded-lg border border-border bg-card/40 px-3 py-2 text-left transition-colors hover:bg-card/70 hover:border-primary/40 min-w-[200px]">
+          {selected === "all" ? (
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Users size={14} />
+            </div>
+          ) : (
+            <Avatar className="h-7 w-7 shrink-0 border border-border">
+              <AvatarImage src={current?.avatarUrl || undefined} alt={current?.username} />
+              <AvatarFallback className="bg-primary/10 text-[11px] text-primary">
+                {(current?.username || "?").charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground leading-none">Exibindo</div>
+            <div className="flex items-center gap-1.5 text-sm font-medium text-foreground truncate leading-tight mt-0.5">
+              {selected === "all" ? "Todas as contas" : current?.username || "Conta"}
+              {current?.connected && (
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" title="Conta conectada" />
+              )}
+            </div>
+          </div>
+          {busy
+            ? <div className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            : <ChevronDown size={15} className="shrink-0 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 p-1.5">
+        <button
+          onClick={() => { onSelect("all"); setOpen(false) }}
+          className={`flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-secondary/60 ${selected === "all" ? "bg-secondary/50" : ""}`}
+        >
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Users size={15} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium text-foreground">Todas as contas</div>
+            <div className="text-[11px] text-muted-foreground">{totalCleanups} limpezas · {totalActions} ações</div>
+          </div>
+          {selected === "all" && <Check size={15} className="shrink-0 text-primary" />}
+        </button>
+
+        {accounts.length > 0 && <div className="my-1 h-px bg-border" />}
+
+        <div className="max-h-72 overflow-y-auto pr-0.5">
+          {accounts.map((a) => (
+            <button
+              key={a.id}
+              onClick={() => { onSelect(a.id); setOpen(false) }}
+              className={`flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-secondary/60 ${selected === a.id ? "bg-secondary/50" : ""}`}
+            >
+              <Avatar className="h-8 w-8 shrink-0 border border-border">
+                <AvatarImage src={a.avatarUrl || undefined} alt={a.username} />
+                <AvatarFallback className="bg-primary/10 text-xs text-primary">{a.username.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-foreground truncate">
+                  {a.username}
+                  {a.connected && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" title="Conta conectada" />}
+                </div>
+                <div className="text-[11px] text-muted-foreground">{a.cleanups} limpezas · {a.actions} ações</div>
+              </div>
+              {selected === a.id && <Check size={15} className="shrink-0 text-primary" />}
+            </button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export default function PaginaAnalytics() {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [monitoring, setMonitoring] = useState<MonitoringAggregate | null>(null)
+  const [tokenAccounts, setTokenAccounts] = useState<AccountOption[]>([])
+  const [selected, setSelected] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refetching, setRefetching] = useState(false)
 
   useEffect(() => {
-    Promise.all([
-      api.getAnalytics().then((res) => setData(res.data as AnalyticsData)).catch(() => {}),
-      api.getMonitoringAggregate().then((res) => setMonitoring(res.data as MonitoringAggregate)).catch(() => {}),
-    ]).finally(() => setLoading(false))
+    let cancelled = false
+    async function init() {
+      let connectedId: string | null = null
+      let tokenList: Array<{ id: string; label?: string; user?: { id: string; username?: string }; avatarUrl?: string }> = []
+      try {
+        const [tokensRes, activeRes] = await Promise.all([api.getTokens(), api.getActiveToken()])
+        tokenList = (tokensRes.data as typeof tokenList) || []
+        const active = activeRes.data
+        if (active?.connected && active.tokenId) {
+          connectedId = tokenList.find((t) => t.id === active.tokenId)?.user?.id || null
+        }
+      } catch { /* ignora */ }
+      if (cancelled) return
+
+      setTokenAccounts(
+        tokenList
+          .filter((t) => t.user?.id)
+          .map((t) => ({
+            id: t.user!.id,
+            username: t.user!.username || t.label || "Conta",
+            avatarUrl: t.avatarUrl || null,
+            connected: t.user!.id === connectedId,
+            cleanups: 0,
+            actions: 0,
+          })),
+      )
+      setSelected(connectedId || "all")
+
+      api.getMonitoringAggregate()
+        .then((res) => { if (!cancelled) setMonitoring(res.data as MonitoringAggregate) })
+        .catch(() => {})
+    }
+    init()
+    return () => { cancelled = true }
   }, [])
+
+  useEffect(() => {
+    if (selected === null) return
+    let cancelled = false
+    setRefetching(true)
+    api.getAnalytics(selected)
+      .then((res) => { if (!cancelled) setData(res.data as AnalyticsData) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) { setLoading(false); setRefetching(false) } })
+    return () => { cancelled = true }
+  }, [selected])
+
+  const accountMap = new Map<string, AccountOption>()
+  for (const o of tokenAccounts) accountMap.set(o.id, { ...o })
+  for (const a of data?.accounts || []) {
+    const ex = accountMap.get(a.id)
+    if (ex) { ex.cleanups = a.cleanups; ex.actions = a.actions; if (!ex.avatarUrl) ex.avatarUrl = a.avatar }
+    else accountMap.set(a.id, { id: a.id, username: a.username, avatarUrl: a.avatar, connected: false, cleanups: a.cleanups, actions: a.actions })
+  }
+  const accountList = [...accountMap.values()].sort((x, y) => (y.cleanups + y.actions) - (x.cleanups + x.actions))
 
   if (loading) {
     return (
@@ -322,12 +491,24 @@ export default function PaginaAnalytics() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-foreground">Analytics</h1>
-        <p className="text-sm text-muted-foreground">Visão geral completa de toda a sua atividade</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">Analytics</h1>
+          <p className="text-sm text-muted-foreground">
+            {selected === "all"
+              ? "Visão geral de todas as contas"
+              : `Atividade de ${accountList.find((a) => a.id === selected)?.username || "conta"}`}
+          </p>
+        </div>
+        <AccountSelector
+          accounts={accountList}
+          selected={selected ?? "all"}
+          onSelect={setSelected}
+          busy={refetching}
+        />
       </div>
 
-      <Tabs defaultValue="geral" className="w-full">
+      <Tabs defaultValue="geral" className={`w-full transition-opacity ${refetching ? "opacity-60" : ""}`}>
         <TabsList className="w-full sm:w-auto">
           <TabsTrigger value="geral" className="gap-1.5">
             <BarChart3 size={14} />
@@ -503,10 +684,16 @@ function GeralTab({ data, toolActions, totalActions, totalAllTime, toolCounts, d
 
 function LimpezasTab({ data }: { data: AnalyticsData }) {
   const [chartType, setChartType] = useState<"bar" | "line">("line")
+
+  const userCleanups = data.cleanups.filter((c) => c.source !== "package")
+  const packageCleanups = data.cleanups.filter((c) => c.source === "package")
+  const packageMsgs = packageCleanups.reduce((sum, c) => sum + c.messagesDeleted, 0)
+
   const avgSpeed = data.totalTimeSpent > 0 ? (data.totalMessagesDeleted / data.totalTimeSpent).toFixed(1) : "0"
   const avgDuration = data.totalCleanups > 0 ? Math.round(data.totalTimeSpent / data.totalCleanups) : 0
-  const totalScanned = data.cleanups.reduce((sum, c) => sum + c.messagesScanned, 0)
-  const hitRate = totalScanned > 0 ? ((data.totalMessagesDeleted / totalScanned) * 100).toFixed(1) : "0"
+  const userScanned = userCleanups.reduce((sum, c) => sum + c.messagesScanned, 0)
+  const userDeleted = userCleanups.reduce((sum, c) => sum + c.messagesDeleted, 0)
+  const hitRate = userScanned > 0 ? ((userDeleted / userScanned) * 100).toFixed(1) : "0"
   const recentCleanups = [...data.cleanups].reverse().slice(0, 20)
 
   const now = new Date()
@@ -524,7 +711,7 @@ function LimpezasTab({ data }: { data: AnalyticsData }) {
   const maxCleanupDay = Math.max(...cleanupDays.map(d => d.count), 1)
 
   const userMap = new Map<string, { username: string; avatarUrl: string | null; totalDeleted: number; count: number; lastDate: string }>()
-  for (const c of data.cleanups) {
+  for (const c of userCleanups) {
     const existing = userMap.get(c.userId)
     if (existing) {
       existing.totalDeleted += c.messagesDeleted
@@ -540,7 +727,7 @@ function LimpezasTab({ data }: { data: AnalyticsData }) {
     <>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         <StatCard icon={<MessageSquare size={10} />} label="Deletadas" value={data.totalMessagesDeleted} color="text-primary" />
-        <StatCard icon={<BarChart3 size={10} />} label="Limpezas" value={data.totalCleanups} color="text-purple-400" />
+        <StatCard icon={<BarChart3 size={10} />} label="Limpezas" value={data.totalCleanups} sub={packageCleanups.length > 0 ? `${packageCleanups.length} de package` : undefined} color="text-purple-400" />
         <StatCard icon={<Zap size={10} />} label="Vel. Média" value={`${avgSpeed}/s`} color="text-yellow-400" />
         <StatCard icon={<Target size={10} />} label="Taxa Acerto" value={`${hitRate}%`} color="text-red-400" />
         <StatCard icon={<Users size={10} />} label="Usuários" value={data.totalUsersCleanedUnique} color="text-emerald-400" />
@@ -628,10 +815,16 @@ function LimpezasTab({ data }: { data: AnalyticsData }) {
             <div className="space-y-2 max-h-72 overflow-y-auto pr-2">
               {recentCleanups.map(c => (
                 <div key={c.id} className="flex items-center gap-3 rounded-lg border border-border bg-secondary/30 p-2.5 transition-colors hover:bg-secondary/50">
-                  <Avatar className="h-8 w-8 border border-border shrink-0">
-                    <AvatarImage src={c.avatarUrl || undefined} alt={c.username} />
-                    <AvatarFallback className="bg-primary/10 text-xs text-primary">{c.username.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
+                  {c.source === "package" ? (
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-purple-500/10 text-purple-400">
+                      <Package size={14} />
+                    </div>
+                  ) : (
+                    <Avatar className="h-8 w-8 border border-border shrink-0">
+                      <AvatarImage src={c.avatarUrl || undefined} alt={c.username} />
+                      <AvatarFallback className="bg-primary/10 text-xs text-primary">{c.username.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-foreground truncate">{c.username}</div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">

@@ -485,13 +485,14 @@ async function executarLimpezaPackage(
     limparProgressoArquivo()
 
     stats.recordCleanup({
-      username: 'Package',
-      userId: me.id,
+      username: 'Limpeza de Package',
+      userId: `package_${me.id}`,
       avatarUrl: null,
       messagesDeleted: totalMensagensApagadas,
       messagesScanned: totalMensagensApagadas,
       duration: Math.floor((Date.now() - startTime) / 1000),
       backup: !!cfg.fazerBackup,
+      source: 'package',
     })
 
     taskManager.completeTask(taskId)
