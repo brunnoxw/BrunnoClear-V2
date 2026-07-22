@@ -8,6 +8,7 @@ const router = Router()
 
 const fecharDmsSchema = z.object({
   tokenId: z.string(),
+  modo: z.enum(['dms', 'grupos', 'ambos']).default('dms'),
 })
 
 router.post('/fechar-dms', validate(fecharDmsSchema), asyncHandler(async (req, res) => {

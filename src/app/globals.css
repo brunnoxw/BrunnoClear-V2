@@ -781,3 +781,122 @@ input[type="number"] {
   height: 2px;
   opacity: 0.6;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Tema Bob Esponja — "Fundo do Mar"
+   Amarelo esponja, contornos de desenho, poros e bolhas subindo
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Watermark do Bob no canto superior direito */
+:root[data-theme="spongebob"] .theme-bg-overlay {
+  background-position: right -30px top -10px;
+}
+
+/* Bolhas subindo — reaproveita os blobs de bloom como bolhas do mar */
+:root[data-theme="spongebob"] .bloom-verde {
+  filter: none !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 34% 30%,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.35) 16%,
+      rgba(178, 231, 244, 0.14) 42%,
+      transparent 60%) !important;
+  border: 2px solid rgba(34, 167, 224, 0.30) !important;
+  box-shadow: inset -6px -9px 16px rgba(34, 167, 224, 0.14),
+              0 0 14px rgba(255, 255, 255, 0.25) !important;
+  opacity: 0.6 !important;
+  top: auto !important;
+  right: auto !important;
+}
+
+:root[data-theme="spongebob"] .bloom-1 { width: 120px !important; height: 120px !important; left: 8%;  bottom: -160px !important; animation: sb-rise 15s linear infinite !important; }
+:root[data-theme="spongebob"] .bloom-2 { width: 70px  !important; height: 70px  !important; left: 26%; bottom: -160px !important; animation: sb-rise 11s linear infinite 2s   !important; }
+:root[data-theme="spongebob"] .bloom-3 { width: 150px !important; height: 150px !important; left: 48%; bottom: -160px !important; animation: sb-rise 19s linear infinite 1s   !important; }
+:root[data-theme="spongebob"] .bloom-4 { width: 55px  !important; height: 55px  !important; left: 68%; bottom: -160px !important; animation: sb-rise 9s  linear infinite 3s   !important; }
+:root[data-theme="spongebob"] .bloom-5 { width: 95px  !important; height: 95px  !important; left: 86%; bottom: -160px !important; animation: sb-rise 13s linear infinite 0.5s !important; }
+
+@keyframes sb-rise {
+  0%   { transform: translateY(0) translateX(0) scale(0.75); opacity: 0; }
+  10%  { opacity: 0.6; }
+  50%  { transform: translateY(-52vh) translateX(24px) scale(1); }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(-108vh) translateX(-14px) scale(1.12); opacity: 0; }
+}
+
+/* Poros de esponja nos cards */
+:root[data-theme="spongebob"] .rounded-xl[class*="bg-card"]:not([data-slot="dialog-content"]),
+:root[data-theme="spongebob"] [class*="bg-card\/"]:not([data-slot="dialog-content"]) {
+  background-image: radial-gradient(circle at center, rgba(184, 187, 48, 0.11) 1.4px, transparent 1.7px);
+  background-size: 20px 20px;
+}
+
+/* Botões primary — amarelo esponja com contorno de desenho e efeito bounce */
+:root[data-theme="spongebob"] button[class*="bg-primary"],
+:root[data-theme="spongebob"] [role="button"][class*="bg-primary"] {
+  border: 2.5px solid #211d0c !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 0 #c99e00, 0 6px 12px rgba(33, 29, 12, 0.22) !important;
+  font-weight: 800 !important;
+  transition: transform 0.13s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.13s ease !important;
+}
+:root[data-theme="spongebob"] button[class*="bg-primary"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #c99e00, 0 10px 16px rgba(33, 29, 12, 0.26) !important;
+}
+:root[data-theme="spongebob"] button[class*="bg-primary"]:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #c99e00, 0 2px 6px rgba(33, 29, 12, 0.2) !important;
+}
+
+/* Botões destructive — vermelho da gravata do Bob */
+:root[data-theme="spongebob"] button[class*="bg-destructive"] {
+  border: 2.5px solid #211d0c !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 0 #b93425, 0 6px 12px rgba(33, 29, 12, 0.22) !important;
+  font-weight: 800 !important;
+  transition: transform 0.13s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.13s ease !important;
+}
+:root[data-theme="spongebob"] button[class*="bg-destructive"]:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #b93425, 0 10px 16px rgba(33, 29, 12, 0.26) !important;
+}
+:root[data-theme="spongebob"] button[class*="bg-destructive"]:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #b93425, 0 2px 6px rgba(33, 29, 12, 0.2) !important;
+}
+
+/* Foco azul (olhos do Bob) em inputs */
+:root[data-theme="spongebob"] input:focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+:root[data-theme="spongebob"] textarea:focus,
+:root[data-theme="spongebob"] select:focus {
+  outline: none !important;
+  border-color: #22a7e0 !important;
+  box-shadow: 0 0 0 3px rgba(34, 167, 224, 0.25) !important;
+}
+
+/* Sidebar com borda de desenho */
+:root[data-theme="spongebob"] [data-slot="sidebar"],
+:root[data-theme="spongebob"] aside[data-sidebar] {
+  border-right: 2px solid rgba(33, 29, 12, 0.22) !important;
+}
+
+/* Títulos mais gordinhos e brincalhões */
+:root[data-theme="spongebob"] h1,
+:root[data-theme="spongebob"] h2,
+:root[data-theme="spongebob"] h3 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Seleção de texto */
+:root[data-theme="spongebob"] ::selection {
+  background: #ffd21a;
+  color: #211d0c;
+}
+
+/* Scrollbar amarela arredondada */
+:root[data-theme="spongebob"] ::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid #c2e9f0;
+  background-clip: padding-box;
+}

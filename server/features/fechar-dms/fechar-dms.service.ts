@@ -8,13 +8,26 @@ import type { FecharDmsConfig } from '../../../src/types/tools'
 const DM_CLOSE_DELAY = 1300
 
 /**
- * Fecha todas as DMs abertas da conta conectada
+ * Fecha DMs 1-a-1 e/ou sai de grupos da conta conectada.
+ * O modo controla o que é processado:
+ *  - 'dms'    → apenas DMs 1-a-1 (padrão)
+ *  - 'grupos' → apenas grupos (group DMs)
+ *  - 'ambos'  → DMs + grupos
  */
 export async function fecharDms(cfg: FecharDmsConfig) {
-  const dms = discord.listOpenDMs()
+  const modo = cfg.modo ?? 'dms'
+
+  const dms: any[] = []
+  if (modo === 'dms' || modo === 'ambos') dms.push(...discord.listOpenDMs())
+  if (modo === 'grupos' || modo === 'ambos') dms.push(...discord.listGroupDMs())
 
   if (dms.length === 0) {
-    throw Object.assign(new Error('Você não tem DMs abertas.'), { statusCode: 400 })
+    const msg = modo === 'grupos'
+      ? 'Você não está em nenhum grupo.'
+      : modo === 'ambos'
+        ? 'Você não tem DMs abertas nem grupos.'
+        : 'Você não tem DMs abertas.'
+    throw Object.assign(new Error(msg), { statusCode: 400 })
   }
 
   const task = taskManager.createTask('fechar-dms', {
@@ -34,7 +47,7 @@ async function executarFechamento(taskId: string, dms: any[]) {
   try {
     let fechadas = 0
 
-    taskManager.updateProgress(taskId, 0, dms.length, `0/${dms.length} DMs fechadas`, 'deleting')
+    taskManager.updateProgress(taskId, 0, dms.length, `0/${dms.length} processados`, 'deleting')
 
     for (const dm of dms) {
       if (taskManager.isAborted(taskId)) {
@@ -52,7 +65,7 @@ async function executarFechamento(taskId: string, dms: any[]) {
 
       taskManager.updateProgress(
         taskId, fechadas, dms.length,
-        `${fechadas}/${dms.length} DMs fechadas`,
+        `${fechadas}/${dms.length} processados`,
         'deleting',
       )
     }

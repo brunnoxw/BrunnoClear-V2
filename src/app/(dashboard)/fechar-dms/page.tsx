@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from "react"
 import {
   PhoneOff,
+  MessageSquare,
+  Users,
+  Layers,
   Loader2,
   CheckCircle2,
   AlertTriangle,
@@ -17,9 +20,17 @@ import { ws } from "@/lib/ws-client"
 import type { WSToolProgress, WSToolCompleted, WSToolError } from "@/types/websocket"
 
 type Phase = "idle" | "running" | "completed" | "error"
+type Modo = "dms" | "grupos" | "ambos"
+
+const MODOS: { id: Modo; titulo: string; desc: string; icone: React.ReactNode }[] = [
+  { id: "dms", titulo: "Só DMs", desc: "Fecha apenas DMs 1-a-1", icone: <MessageSquare size={16} /> },
+  { id: "grupos", titulo: "Só grupos", desc: "Sai apenas dos grupos", icone: <Users size={16} /> },
+  { id: "ambos", titulo: "DMs + grupos", desc: "Fecha DMs e sai dos grupos", icone: <Layers size={16} /> },
+]
 
 export default function PaginaFecharDms() {
   const { activeToken } = useTokens()
+  const [modo, setModo] = useState<Modo>("dms")
   const [starting, setStarting] = useState(false)
 
   const [taskId, setTaskId] = useState<string | null>(null)
@@ -83,6 +94,7 @@ export default function PaginaFecharDms() {
     try {
       const res = await api.runTool("fechar-dms", {
         tokenId: activeToken.id,
+        modo,
       })
       const data = res.data as { taskId: string }
       setTaskId(data.taskId)
@@ -119,6 +131,8 @@ export default function PaginaFecharDms() {
 
   const pct = total > 0 ? Math.round((progress / total) * 100) : 0
 
+  const labelAlvo = modo === "grupos" ? "grupos" : modo === "ambos" ? "DMs e grupos" : "DMs"
+
   if (phase === "idle") {
     return (
       <div className="space-y-6">
@@ -136,13 +150,44 @@ export default function PaginaFecharDms() {
             </div>
             <div>
               <h2 className="text-sm font-semibold text-foreground">Fechar DMs</h2>
-              <p className="text-xs text-muted-foreground">Fecha todas as DMs abertas da conta (não apaga mensagens)</p>
+              <p className="text-xs text-muted-foreground">Fecha DMs abertas e/ou sai de grupos (não apaga mensagens)</p>
+            </div>
+          </div>
+
+          <div className="mb-6 space-y-2">
+            <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Modo</label>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {MODOS.map((m) => {
+                const ativo = modo === m.id
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setModo(m.id)}
+                    className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors ${
+                      ativo
+                        ? "border-primary/50 bg-primary/10"
+                        : "border-border bg-secondary/10 hover:border-border/80 hover:bg-secondary/20"
+                    }`}
+                  >
+                    <div className={`flex items-center gap-2 text-sm font-medium ${ativo ? "text-primary" : "text-foreground"}`}>
+                      {m.icone}
+                      {m.titulo}
+                    </div>
+                    <span className="text-[11px] text-muted-foreground">{m.desc}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
           <div className="rounded-lg border border-border bg-secondary/10 p-4">
             <p className="text-sm text-muted-foreground">
-              Esta ferramenta fecha todas as conversas privadas abertas. As mensagens <strong className="text-foreground">não</strong> serão apagadas — apenas a DM será removida da lista de mensagens diretas.
+              {modo === "grupos"
+                ? <>Você sairá de <strong className="text-foreground">todos os grupos</strong>. Sair de um grupo é irreversível — você precisará ser convidado novamente.</>
+                : modo === "ambos"
+                  ? <>Fecha todas as DMs 1-a-1 e sai de <strong className="text-foreground">todos os grupos</strong>. Mensagens não são apagadas; sair de grupos é irreversível.</>
+                  : <>Fecha todas as conversas privadas abertas. As mensagens <strong className="text-foreground">não</strong> serão apagadas — apenas a DM será removida da lista.</>}
             </p>
           </div>
 
@@ -156,7 +201,7 @@ export default function PaginaFecharDms() {
           <div className="mt-6">
             <Button onClick={handleStart} disabled={starting || !activeToken} className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90">
               {starting ? <Loader2 size={18} className="mr-2 animate-spin" /> : <PhoneOff size={18} className="mr-2" />}
-              Fechar Todas as DMs
+              {modo === "grupos" ? "Sair de Todos os Grupos" : modo === "ambos" ? "Fechar DMs e Sair dos Grupos" : "Fechar Todas as DMs"}
             </Button>
           </div>
         </div>
@@ -174,8 +219,8 @@ export default function PaginaFecharDms() {
                 <PhoneOff size={18} className="text-primary animate-pulse" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-foreground">Fechando DMs</h3>
-                <p className="text-xs text-muted-foreground">Fechando conversas abertas...</p>
+                <h3 className="text-lg font-semibold text-foreground">Fechando {labelAlvo}</h3>
+                <p className="text-xs text-muted-foreground">Processando...</p>
               </div>
             </div>
             <Button onClick={handleCancel} variant="outline" size="sm" className="h-9">
@@ -193,7 +238,7 @@ export default function PaginaFecharDms() {
                 <div className="h-full bg-primary transition-all duration-300" style={{ width: `${pct}%` }} />
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                {progress} de {total} DMs fechadas • {fmt(elapsedSeconds)}
+                {progress} de {total} {labelAlvo} • {fmt(elapsedSeconds)}
               </p>
             </div>
             {statusMessage && (
@@ -214,8 +259,8 @@ export default function PaginaFecharDms() {
               <CheckCircle2 size={24} className="text-green-400" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-green-400">DMs fechadas!</h3>
-              <p className="text-sm text-muted-foreground">{progress} de {total} DMs foram fechadas em {fmt(elapsedSeconds)}</p>
+              <h3 className="text-lg font-semibold text-green-400">Concluído!</h3>
+              <p className="text-sm text-muted-foreground">{progress} de {total} {labelAlvo} processados em {fmt(elapsedSeconds)}</p>
             </div>
             <Button onClick={handleReset} variant="outline" className="h-10">
               <RotateCcw size={16} className="mr-2" /> Voltar

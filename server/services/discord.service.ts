@@ -468,6 +468,13 @@ class DiscordService {
       .map((c: any) => c)
   }
 
+  listGroupDMs(): any[] {
+    const client = this.getClient()
+    return client.channels.cache
+      .filter((c: any) => c.type === 'GROUP_DM')
+      .map((c: any) => c)
+  }
+
   async closeDM(channelId: string): Promise<void> {
     const client = this.getClient()
     const channel = await client.channels.fetch(channelId)

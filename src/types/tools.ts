@@ -120,6 +120,7 @@ export interface ScraperIconsConfig {
 
 export interface FecharDmsConfig {
   tokenId: string
+  modo?: 'dms' | 'grupos' | 'ambos'
 }
 
 export interface TormentFlags {
