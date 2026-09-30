@@ -130,7 +130,6 @@ function parseBody(body: string): ChangeSection[] {
     const itemMatch = line.match(/^[-*•]\s+(.+)/)
     if (itemMatch) {
       const text = itemMatch[1]
-        .replace(/\*\*/g, "") 
         .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
         .replace(/ by @\S+ in .+$/i, "")
         .trim()
@@ -154,7 +153,6 @@ function parseBody(body: string): ChangeSection[] {
 
     if (line.length > 5 && !line.startsWith("#")) {
       const cleaned = line
-        .replace(/\*\*/g, "")
         .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
         .trim()
       if (cleaned && !isNoise(cleaned)) {
@@ -173,6 +171,14 @@ function parseBody(body: string): ChangeSection[] {
   sections.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
 
   return sections.filter((s) => s.items.length > 0)
+}
+
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, i) => {
+    if (/^\*\*[^*]+\*\*$/.test(part)) return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>
+    if (/^`[^`]+`$/.test(part)) return <code key={i} className="rounded bg-secondary px-1 py-0.5 font-mono text-[11px]">{part.slice(1, -1)}</code>
+    return <span key={i}>{part}</span>
+  })
 }
 
 
@@ -338,9 +344,9 @@ export function WhatsNew() {
                   </div>
                   <div className="divide-y divide-border/40">
                     {section.items.map((item, i) => (
-                      <div key={i} className="flex items-start gap-2 px-3 py-1.5">
-                        <span className={`mt-[6px] h-1 w-1 shrink-0 rounded-full bg-current ${config.color}`} />
-                        <span className="text-xs leading-snug text-foreground/90">{item}</span>
+                      <div key={i} className="flex items-start gap-2.5 px-3.5 py-2.5">
+                        <span className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-current ${config.color}`} />
+                        <span className="text-[13px] leading-relaxed text-muted-foreground [&_strong]:text-foreground">{renderInline(item)}</span>
                       </div>
                     ))}
                   </div>
