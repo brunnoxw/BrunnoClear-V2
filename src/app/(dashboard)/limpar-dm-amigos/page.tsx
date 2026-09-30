@@ -202,7 +202,6 @@ export default function PaginaLimparDmAmigos() {
           </div>
         )}
 
-        {/* Configuração */}
         <div className="rounded-xl border border-border bg-card/40 p-6">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">

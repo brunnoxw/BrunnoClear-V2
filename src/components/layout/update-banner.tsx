@@ -12,7 +12,6 @@ export function UpdateBanner() {
     downloadUpdate()
   }
 
-  // Sai do estado "preparando" quando o download de fato começa
   if (preparing && status.status === "downloading") {
     setPreparing(false)
   }
@@ -42,7 +41,6 @@ export function UpdateBanner() {
   if (status.status === "available") {
     return (
       <div className="relative overflow-hidden border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-emerald-400/5 to-teal-500/10">
-        {/* Shimmer animado */}
         <div
           className="pointer-events-none absolute inset-0 -translate-x-full animate-[shimmer_3s_ease-in-out_infinite]"
           style={{

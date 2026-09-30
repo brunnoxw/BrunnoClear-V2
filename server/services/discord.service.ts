@@ -52,10 +52,35 @@ class DiscordService {
     }
   }
 
-  async validateToken(token: string): Promise<{ valid: boolean; user?: DiscordUser }> {
-    const user = await this.fetchUserInfo(token)
-    if (user) return { valid: true, user }
-    return { valid: false }
+  /**
+   * Valida um token na API REST do Discord.
+   * `reason` distingue token definitivamente inválido (`unauthorized`, seguro
+   * remover) de falhas transitórias (`network`/`rate-limited`/`unknown`), que
+   * NÃO devem remover a conta — evita apagar contas por queda de internet.
+   */
+  async validateToken(token: string): Promise<{
+    valid: boolean
+    user?: DiscordUser
+    reason?: 'unauthorized' | 'network' | 'rate-limited' | 'unknown'
+  }> {
+    try {
+      const res = await fetch(`${DISCORD_API}/users/@me`, {
+        headers: { Authorization: token },
+      })
+      if (res.ok) {
+        const user = await res.json() as DiscordUser
+        return { valid: true, user }
+      }
+      if (res.status === 401 || res.status === 403) {
+        return { valid: false, reason: 'unauthorized' }
+      }
+      if (res.status === 429) {
+        return { valid: false, reason: 'rate-limited' }
+      }
+      return { valid: false, reason: 'unknown' }
+    } catch {
+      return { valid: false, reason: 'network' }
+    }
   }
 
   /**

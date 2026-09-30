@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { limparDmRoutes } from './limpar-dm'
 import { backupToolRoutes } from './backup'
 import { limparPackageRoutes } from './limpar-package'
+import { packageAnalyticsRoutes } from './package-analytics'
 import { abrirDmsRoutes } from './abrir-dms'
 import { limparDmsAbertasRoutes } from './limpar-dms-abertas'
 import { limparDmAmigosRoutes } from './limpar-dm-amigos'
@@ -20,6 +21,7 @@ const featureRouter = Router()
 featureRouter.use('/', limparDmRoutes)
 featureRouter.use('/', backupToolRoutes)
 featureRouter.use('/', limparPackageRoutes)
+featureRouter.use('/', packageAnalyticsRoutes)
 featureRouter.use('/', abrirDmsRoutes)
 featureRouter.use('/', limparDmsAbertasRoutes)
 featureRouter.use('/', limparDmAmigosRoutes)

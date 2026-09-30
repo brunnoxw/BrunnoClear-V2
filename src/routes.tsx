@@ -18,6 +18,7 @@ const LimparDm = lazy(() => import('./app/(dashboard)/limpar-dm/page'))
 const LimparDmAmigos = lazy(() => import('./app/(dashboard)/limpar-dm-amigos/page'))
 const LimparDms = lazy(() => import('./app/(dashboard)/limpar-dms/page'))
 const LimparPackage = lazy(() => import('./app/(dashboard)/limpar-package/page'))
+const AnalisePackage = lazy(() => import('./app/(dashboard)/analise-package/page'))
 const AbrirDms = lazy(() => import('./app/(dashboard)/abrir-dms/page'))
 const ListarCall = lazy(() => import('./app/(dashboard)/listar-call/page'))
 const Monitoramento = lazy(() => import('./app/(dashboard)/monitoramento/page'))
@@ -73,6 +74,7 @@ export function AppRoutes() {
           <Route path="limpar-dm-amigos" element={<LimparDmAmigos />} />
           <Route path="limpar-dms" element={<LimparDms />} />
           <Route path="limpar-package" element={<LimparPackage />} />
+          <Route path="analise-package" element={<AnalisePackage />} />
           <Route path="abrir-dms" element={<AbrirDms />} />
           <Route path="listar-call" element={<ListarCall />} />
           <Route path="monitoramento" element={<Monitoramento />} />

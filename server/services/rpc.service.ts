@@ -98,22 +98,58 @@ async function getTheme() {
   }
 }
 
+let lastInitError = 0
+
 export async function initRPC(): Promise<boolean> {
   const settings = storage.getSettings()
+  const appId = settings.rpc.applicationId || DEFAULT_APP_ID
+  const t0 = Date.now()
+
+  logger.info('RPC', `Conectando ao Discord via IPC — applicationId=${appId}${appId === DEFAULT_APP_ID ? ' (padrão)' : ''}`)
+
+  if (client) {
+    try { await client.destroy() } catch { /* ignore */ }
+    client = null
+  }
 
   try {
-    const appId = settings.rpc.applicationId || DEFAULT_APP_ID
     client = new RPC.Client({ transport: 'ipc' })
+    client.on('disconnected', () => {
+      logger.warn('RPC', 'Discord desconectou o Rich Presence (IPC caiu)')
+      isActive = false
+    })
     RPC.register(appId)
     await client.login({ clientId: appId })
     appIconCache = null
     isActive = true
     startTimestamp = Date.now()
-    logger.success('RPC', 'Rich Presence conectado')
+    const me = (() => { try { return discord.getMe()?.username } catch { return null } })()
+    logger.success('RPC', `Rich Presence conectado em ${Date.now() - t0}ms${me ? ` (avatar de @${me})` : ''}`)
     return true
   } catch (err: any) {
-    logger.error('RPC', `Erro ao inicializar: ${err.message}`)
     isActive = false
+    try { if (client) await client.destroy() } catch { /* ignore */ }
+    client = null
+
+    const code = err?.code || err?.message || 'desconhecido'
+    const elapsed = Date.now() - t0
+    logger.error('RPC', `Falha ao conectar (${elapsed}ms) — código: ${code}`)
+
+    if (Date.now() - lastInitError > 30000) {
+      lastInitError = Date.now()
+      const msg = String(err?.message || '')
+      if (/timeout/i.test(msg) || /RPC_CONNECTION_TIMEOUT/i.test(code)) {
+        logger.warn('RPC', 'Timeout de conexão IPC. Causas comuns:')
+        logger.warn('RPC', '  1) O app DESKTOP do Discord não está aberto/logado (RPC só funciona com ele rodando — web/browser não expõe o IPC).')
+        logger.warn('RPC', '  2) Há outro cliente Discord (PTB/Canary) segurando o pipe, ou o Discord acabou de abrir e ainda não subiu o IPC.')
+        logger.warn('RPC', `  3) O Application ID (${appId}) não existe ou foi digitado errado nas configurações de RPC.`)
+        logger.warn('RPC', '  → Abra o Discord desktop, faça login e tente novamente (/rpc → reconectar).')
+      } else if (/could not connect|ENOENT|ECONNREFUSED/i.test(msg)) {
+        logger.warn('RPC', 'Pipe IPC do Discord não encontrado — o Discord desktop provavelmente está fechado.')
+      } else {
+        logger.warn('RPC', `Detalhe do erro: ${msg || '(sem mensagem)'}`)
+      }
+    }
     return false
   }
 }
@@ -224,6 +260,7 @@ const PAGE_PRESENCE: Record<string, { details: string; state?: string }> = {
   '/sair-servidores': { details: 'Sair Servidores', state: 'Gerenciando servidores' },
   '/clonar-servidor': { details: 'Clonar Servidor', state: 'Clonagem de servidor' },
   '/scraper-icones': { details: 'Scraper Ícones', state: 'Coletando imagens' },
+  '/analise-package': { details: 'Análise de Package', state: 'Analisando pacote de dados' },
   '/limpar-package': { details: 'Limpar Package', state: 'Limpando dados exportados' },
   '/abrir-dms': { details: 'Abrir DMs', state: 'Abrindo conversas' },
   '/prefix-commands': { details: 'Comandos Prefix', state: 'Gerenciando comandos' },
@@ -392,6 +429,19 @@ function setupTaskListeners() {
     } else if (tool === 'abrir-dms') {
       details = `Abrir DMs - ${pct}%`
       state = `${progress}/${total} DMs abertas`
+    } else if (tool === 'package-analytics') {
+      const phaseLabels: Record<string, string> = {
+        starting: 'Preparando análise',
+        account: 'Lendo conta',
+        servers: 'Servidores',
+        messages: 'Mensagens',
+        activity: 'Atividade',
+        finishing: 'Finalizando',
+      }
+      const msgs = Number((data as any).messagesParsed ?? 0)
+      const label = phaseLabels[phase || ''] || 'Analisando'
+      details = `Análise de Package - ${pct}%`
+      state = msgs > 0 ? `${label} · ${msgs.toLocaleString('pt-BR')} msgs` : label
     }
 
     if (details) {

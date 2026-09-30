@@ -25,6 +25,7 @@ export type ToolType =
   | 'limpar-dm'
   | 'backup'
   | 'limpar-package'
+  | 'package-analytics'
   | 'abrir-dms'
   | 'limpar-dms-abertas'
   | 'remover-amigos'

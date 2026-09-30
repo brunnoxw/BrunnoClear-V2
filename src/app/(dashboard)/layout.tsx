@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation } from "react-router-dom"
 import { Sidebar } from "@/components/layout/sidebar"
+import { ErrorBoundary } from "@/components/layout/error-boundary"
 import { NavegacaoSuperior } from "@/components/layout/navegacao-superior"
 import { FundoBloom } from "@/components/layout/fundo-bloom"
 import { Onboarding } from "@/components/layout/onboarding"
@@ -16,6 +17,7 @@ export default function LayoutDashboard() {
   const [hasAccounts, setHasAccounts] = useState(true)
 
   const { tokens, loading, refetch } = useTokens()
+  const location = useLocation()
 
   useCorPainel()
   useRpcPresence()
@@ -72,7 +74,9 @@ export default function LayoutDashboard() {
         <NavegacaoSuperior />
         <UpdateBanner />
         <div className="p-6">
-          <Outlet />
+          <ErrorBoundary key={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
       <WhatsNew />

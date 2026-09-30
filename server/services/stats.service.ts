@@ -72,9 +72,6 @@ interface StoredData {
 class StatsService {
   private data: StoredData = { cleanups: [], toolActions: [] }
 
-  // Resolvido dinamicamente: config.storage.dataPath só recebe o valor final
-  // (userData do Electron) depois que initDataPath() roda, após este singleton
-  // já ter sido construído.
   private get filePath(): string {
     return path.join(config.storage.dataPath, 'analytics.json')
   }

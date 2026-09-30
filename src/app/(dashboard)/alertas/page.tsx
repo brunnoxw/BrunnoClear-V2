@@ -108,7 +108,6 @@ export default function PaginaAlertas() {
       setConfig(status.config)
       setConnected(status.connected)
     } catch {
-      // reverte para o estado anterior em caso de erro
       setConfig(configRef.current)
     } finally {
       setSaving(false)
@@ -156,7 +155,6 @@ export default function PaginaAlertas() {
 
   return (
     <div className="space-y-6">
-      {/* Header / master switch */}
       <div className={`rounded-xl border p-6 transition-colors ${active ? "border-primary/30 bg-primary/5" : "border-border bg-card/40"}`}>
         <div className="flex items-center gap-4">
           <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${active ? "bg-primary/15" : "bg-secondary/40"}`}>
@@ -193,7 +191,6 @@ export default function PaginaAlertas() {
         )}
       </div>
 
-      {/* Keywords */}
       <div className="rounded-xl border border-border bg-card/40 p-6">
         <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Palavras-chave</label>
         <div className="mt-3 flex gap-2">
@@ -229,7 +226,6 @@ export default function PaginaAlertas() {
         )}
       </div>
 
-      {/* Options */}
       <div className="grid gap-3 rounded-xl border border-border bg-card/40 p-4 sm:grid-cols-2">
         <OptionRow label="Ignorar minhas mensagens" desc="Não alerta quando você mesmo escreve" checked={config.ignoreOwn} onChange={(v) => toggle("ignoreOwn", v)} />
         <OptionRow label="Ignorar bots" desc="Não alerta mensagens de bots" checked={config.ignoreBots} onChange={(v) => toggle("ignoreBots", v)} />
@@ -238,7 +234,6 @@ export default function PaginaAlertas() {
         <OptionRow label="Apenas DMs" desc="Só alerta em mensagens diretas" checked={config.dmOnly} onChange={(v) => toggle("dmOnly", v)} />
       </div>
 
-      {/* Feed */}
       <div className="rounded-xl border border-border bg-card/40">
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
           <div className="flex items-center gap-2">

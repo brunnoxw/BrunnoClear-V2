@@ -61,6 +61,9 @@ class ApiClient {
   getTokenDms(id: string) { return this.get(`/tokens/${id}/dms`) }
   getTokenFriends(id: string) { return this.get(`/tokens/${id}/friends`) }
   hasAccounts() { return this.get<{ hasAccounts: boolean; count: number }>('/tokens/has-accounts') }
+  validateAllTokens() {
+    return this.post<{ removed: Array<{ id: string; label: string; userId?: string }>; remaining: number }>('/tokens/validate-all')
+  }
   scanTokens() { return this.post('/tokens/scan') }
   addScannedTokens(tokens: Array<{ token: string; username?: string }>) {
     return this.post('/tokens/scan/add', { tokens })
@@ -80,6 +83,25 @@ class ApiClient {
   clearCompletedTasks() { return this.delete('/tools/tasks/completed') }
 
   runTool(tool: string, config: unknown) { return this.post(`/tools/${tool}`, config) }
+
+  analisarPackageDados(zipPath: string, botToken?: string) {
+    return this.post<{ taskId: string }>('/tools/package-analytics/analisar', { zipPath, botToken })
+  }
+  getPackageResultado<T>(taskId: string) {
+    return this.get<T>(`/tools/package-analytics/resultado/${taskId}`)
+  }
+  salvarPackage(taskId: string, name?: string) {
+    return this.post('/tools/package-analytics/save', { taskId, name })
+  }
+  listarPackagesSalvos<T>() {
+    return this.get<T>('/tools/package-analytics/saved')
+  }
+  getPackageSalvo<T>(id: string) {
+    return this.get<T>(`/tools/package-analytics/saved/${id}`)
+  }
+  deletarPackageSalvo(id: string) {
+    return this.delete(`/tools/package-analytics/saved/${id}`)
+  }
 
   getBackups() { return this.get('/backups') }
   getBackupData(id: string) { return this.get(`/backups/${id}/data`) }

@@ -49,6 +49,7 @@ CHANGELOG.md
 scripts/update-release-notes.mjs
 # Misc
 *.tsbuildinfo
-
+# Debug Packages
+packages_examples/*
 # meu parceiro de codigo
 .claude/*

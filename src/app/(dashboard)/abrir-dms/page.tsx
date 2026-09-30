@@ -260,7 +260,6 @@ export default function PaginaAbrirDms() {
 
   const pct = total > 0 ? Math.round((progress / total) * 100) : 0
 
-  // ---------------- Setup (idle / analyzing / ready) ----------------
   if (phase === "idle" || phase === "analyzing" || phase === "ready") {
     return (
       <div className="space-y-6">
@@ -282,7 +281,6 @@ export default function PaginaAbrirDms() {
             </div>
           </div>
 
-          {/* Mode selector */}
           <div className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-secondary/20 p-1">
             <button
               onClick={() => { setMode("especifico"); setAnalysis(null); setPhase("idle") }}
@@ -468,7 +466,6 @@ export default function PaginaAbrirDms() {
     )
   }
 
-  // ---------------- Opening ----------------
   if (phase === "opening") {
     const remaining = total - progress
     const speed = elapsedSeconds > 0 ? (progress / elapsedSeconds).toFixed(1) : "0"
@@ -574,7 +571,6 @@ export default function PaginaAbrirDms() {
     )
   }
 
-  // ---------------- Completed ----------------
   if (phase === "completed") {
     return (
       <div className="space-y-6">
@@ -627,7 +623,6 @@ export default function PaginaAbrirDms() {
     )
   }
 
-  // ---------------- Error ----------------
   const isCancelled = error?.includes("Cancelado")
   return (
     <div className="space-y-6">

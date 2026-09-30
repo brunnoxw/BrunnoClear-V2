@@ -900,3 +900,185 @@ input[type="number"] {
   border: 2px solid #c2e9f0;
   background-clip: padding-box;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Tema BRUNNO ✏️ — rabisco minimalista e ridículo
+   Papel off-white, tinta preta, Comic Sans, bordas tortas à mão.
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes brunno-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-1.4deg); }
+  75%      { transform: rotate(1.4deg); }
+}
+
+/* Comic Sans em TUDO — o coração da piada */
+:root[data-theme="brunno"],
+:root[data-theme="brunno"] * {
+  font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Comic Neue", cursive !important;
+  letter-spacing: 0 !important;
+}
+
+/* Papel pontilhado de caderninho no fundo */
+:root[data-theme="brunno"] body {
+  background-image: radial-gradient(rgba(46, 43, 40, 0.09) 1.1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+/* Sem glow colorido — bloom quase apagado pra manter o minimalismo */
+:root[data-theme="brunno"] .bloom-verde {
+  opacity: 0.04 !important;
+  filter: blur(120px) grayscale(1) !important;
+}
+
+/* Cards — bordas tortas desenhadas à mão, levemente caídos */
+:root[data-theme="brunno"] .rounded-xl[class*="bg-card"]:not([data-slot="dialog-content"]):not([data-slot="popover-content"]),
+:root[data-theme="brunno"] [class*="bg-card\/"]:not([data-slot="dialog-content"]):not([data-slot="popover-content"]) {
+  border: 2px solid #2e2b28 !important;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  box-shadow: 3px 3px 0 rgba(46, 43, 40, 0.14) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+}
+/* Alterna o formato torto e a inclinação pra parecer feito na mão */
+:root[data-theme="brunno"] .rounded-xl[class*="bg-card"]:nth-of-type(even):not([data-slot="dialog-content"]):not([data-slot="popover-content"]),
+:root[data-theme="brunno"] [class*="bg-card\/"]:nth-of-type(even):not([data-slot="dialog-content"]):not([data-slot="popover-content"]) {
+  border-radius: 15px 225px 15px 255px / 225px 15px 255px 15px !important;
+  transform: rotate(-0.45deg);
+}
+:root[data-theme="brunno"] .rounded-xl[class*="bg-card"]:nth-of-type(odd):not([data-slot="dialog-content"]):not([data-slot="popover-content"]),
+:root[data-theme="brunno"] [class*="bg-card\/"]:nth-of-type(odd):not([data-slot="dialog-content"]):not([data-slot="popover-content"]) {
+  transform: rotate(0.4deg);
+}
+:root[data-theme="brunno"] .rounded-xl[class*="bg-card"]:not([data-slot="dialog-content"]):not([data-slot="popover-content"]):hover,
+:root[data-theme="brunno"] [class*="bg-card\/"]:not([data-slot="dialog-content"]):not([data-slot="popover-content"]):hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 5px 5px 0 rgba(46, 43, 40, 0.18) !important;
+}
+
+/* Dialog / popover — também tortinhos, mas de leve */
+:root[data-theme="brunno"] [data-slot="dialog-content"] {
+  border: 2px solid #2e2b28 !important;
+  border-radius: 30px 8px 30px 8px / 8px 30px 8px 30px !important;
+  box-shadow: 6px 6px 0 rgba(46, 43, 40, 0.16) !important;
+}
+:root[data-theme="brunno"] [data-slot="dialog-overlay"] {
+  background: rgba(46, 43, 40, 0.35) !important;
+}
+:root[data-theme="brunno"] [data-slot="popover-content"] {
+  border: 2px solid #2e2b28 !important;
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px !important;
+  box-shadow: 4px 4px 0 rgba(46, 43, 40, 0.16) !important;
+}
+
+/* Sidebar — divisória tracejada, tipo desenho de caderno */
+:root[data-theme="brunno"] aside {
+  border-right: 2px dashed #2e2b28 !important;
+}
+
+/* Botões primary/accent/destructive — bordas tortas + wiggle bobo no hover */
+:root[data-theme="brunno"] button[class*="bg-primary"],
+:root[data-theme="brunno"] button[class*="bg-accent"]:not([class*="bg-accent-"]),
+:root[data-theme="brunno"] button[class*="bg-destructive"],
+:root[data-theme="brunno"] [role="button"][class*="bg-primary"] {
+  border: 2px solid #2e2b28 !important;
+  border-radius: 225px 12px 225px 12px / 12px 225px 12px 225px !important;
+  box-shadow: 2px 2px 0 rgba(46, 43, 40, 0.28) !important;
+  font-weight: 700 !important;
+  transition: box-shadow 0.12s ease !important;
+}
+:root[data-theme="brunno"] button[class*="bg-primary"]:hover:not(:disabled),
+:root[data-theme="brunno"] button[class*="bg-accent"]:not([class*="bg-accent-"]):hover:not(:disabled),
+:root[data-theme="brunno"] button[class*="bg-destructive"]:hover:not(:disabled),
+:root[data-theme="brunno"] [role="button"][class*="bg-primary"]:hover:not(:disabled) {
+  animation: brunno-wiggle 0.4s ease-in-out;
+  box-shadow: 4px 4px 0 rgba(46, 43, 40, 0.3) !important;
+}
+:root[data-theme="brunno"] button[class*="bg-primary"]:active:not(:disabled),
+:root[data-theme="brunno"] button[class*="bg-accent"]:not([class*="bg-accent-"]):active:not(:disabled),
+:root[data-theme="brunno"] button[class*="bg-destructive"]:active:not(:disabled) {
+  box-shadow: 0 0 0 rgba(46, 43, 40, 0.3) !important;
+  transform: translate(2px, 2px);
+}
+
+/* Botões com borda (secundários) — contorno torto que preenche no hover */
+:root[data-theme="brunno"] button[class*="border-border"]:not([class*="bg-primary"]):not([class*="bg-accent"]):not([class*="bg-destructive"]),
+:root[data-theme="brunno"] button[class*="border-input"]:not([class*="bg-primary"]):not([class*="bg-accent"]):not([class*="bg-destructive"]) {
+  border: 2px solid #2e2b28 !important;
+  border-radius: 18px 6px 18px 6px / 6px 18px 6px 18px !important;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+:root[data-theme="brunno"] button[class*="border-border"]:not([class*="bg-primary"]):not([class*="bg-accent"]):not([class*="bg-destructive"]):hover:not(:disabled),
+:root[data-theme="brunno"] button[class*="border-input"]:not([class*="bg-primary"]):not([class*="bg-accent"]):not([class*="bg-destructive"]):hover:not(:disabled) {
+  background-color: #2e2b28 !important;
+  color: #fffdf8 !important;
+}
+
+/* Inputs — retângulos tortos desenhados à mão */
+:root[data-theme="brunno"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+:root[data-theme="brunno"] textarea,
+:root[data-theme="brunno"] select {
+  border: 2px solid #2e2b28 !important;
+  border-radius: 18px 8px 18px 8px / 8px 18px 8px 18px !important;
+  transition: box-shadow 0.12s ease;
+}
+:root[data-theme="brunno"] input:focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+:root[data-theme="brunno"] textarea:focus,
+:root[data-theme="brunno"] select:focus {
+  outline: none !important;
+  box-shadow: 3px 3px 0 rgba(46, 43, 40, 0.2) !important;
+}
+
+/* Títulos — Comic Sans grosso com sublinhado ondulado */
+:root[data-theme="brunno"] h1,
+:root[data-theme="brunno"] h2,
+:root[data-theme="brunno"] h3 {
+  font-weight: 700 !important;
+  text-decoration: underline wavy #2e2b28;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 5px;
+}
+
+/* Avatares e imagens redondas ganham contorno de caneta */
+:root[data-theme="brunno"] img[class*="rounded-full"],
+:root[data-theme="brunno"] [class*="rounded-full"] > img {
+  border: 2px solid #2e2b28;
+}
+
+/* Switch — caixinha torta desenhada à mão */
+:root[data-theme="brunno"] [role="switch"] {
+  border: 2px solid #2e2b28 !important;
+  border-radius: 12px 5px 12px 5px / 5px 12px 5px 12px !important;
+}
+
+/* Seleção de texto */
+:root[data-theme="brunno"] ::selection {
+  background: #2e2b28;
+  color: #fffdf8;
+}
+
+/* Separadores — linha tracejada de caderno */
+:root[data-theme="brunno"] hr,
+:root[data-theme="brunno"] [role="separator"] {
+  background: repeating-linear-gradient(90deg, #2e2b28 0 7px, transparent 7px 13px);
+  border: none;
+  height: 2px;
+  opacity: 0.6;
+}
+
+/* Scrollbar fininha e discreta */
+:root[data-theme="brunno"] ::-webkit-scrollbar {
+  width: 10px;
+}
+:root[data-theme="brunno"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+:root[data-theme="brunno"] ::-webkit-scrollbar-thumb {
+  background: #2e2b28;
+  border-radius: 999px;
+  border: 3px solid #f6f3ec;
+  background-clip: padding-box;
+}
+:root[data-theme="brunno"] ::-webkit-scrollbar-thumb:hover {
+  background: #4a453e;
+  background-clip: padding-box;
+}

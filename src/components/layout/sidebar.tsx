@@ -47,6 +47,7 @@ import {
   Headphones,
   Crosshair,
   BellRing,
+  PieChart,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -132,6 +133,7 @@ const secoesMenu: SecaoMenu[] = [
     titulo: "Dados",
     icone: <Database size={16} />,
     itens: [
+      { titulo: "Análise de Package", icone: <PieChart size={16} />, href: "/analise-package" },
       { titulo: "Backups", icone: <Archive size={16} />, href: "/backups" },
     ],
   },
@@ -213,15 +215,18 @@ export function Sidebar() {
     setContextMenu({ tokenId, x: e.clientX, y: e.clientY })
   }, [])
 
-  const handleRemoverConta = useCallback(async () => {
-    if (!contextMenu) return
-    const id = contextMenu.tokenId
+  const removerConta = useCallback(async (id: string) => {
     setContextMenu(null)
     await removeToken(id)
-    if (outrasContas.length <= 1) {
+    if (tokens.length <= 1) {
       setContasAbertas(false)
     }
-  }, [contextMenu, removeToken, outrasContas.length])
+  }, [removeToken, tokens.length])
+
+  const handleRemoverConta = useCallback(async () => {
+    if (!contextMenu) return
+    await removerConta(contextMenu.tokenId)
+  }, [contextMenu, removerConta])
 
   useEffect(() => {
     if (!contextMenu) return
@@ -370,94 +375,127 @@ export function Sidebar() {
                   {outrasContas.length > 0 && (
                     <div className="space-y-0.5 mt-0.5">
                       {outrasContas.map((token) => (
-                        <button
+                        <div
                           key={token.id}
-                          onClick={() => trocarConta(token.id)}
                           onContextMenu={(e) => handleContextMenu(e, token.id)}
-                          disabled={connecting || switchOnCooldown}
-                          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 transition-all hover:bg-secondary/80 disabled:opacity-50"
+                          className="group/conta flex items-center rounded-lg transition-all hover:bg-secondary/80"
                         >
-                          <Avatar className="h-8 w-8 shrink-0">
-                            <AvatarImage src={token.avatarUrl} alt={token.label} />
-                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                              {token.label.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col items-start flex-1 min-w-0">
-                            <div className="flex items-center gap-1 w-full">
-                              <span className="text-[13px] truncate text-left text-foreground/80">
-                                {token.user?.global_name || token.user?.username || token.label}
-                              </span>
-                              {token.badges && token.badges.length > 0 && (
-                                <div className="flex items-center gap-px shrink-0">
-                                  {token.badges.map((badge) => (
-                                    <Tooltip key={badge.name}>
-                                      <TooltipTrigger asChild>
-                                        <img src={badge.url} alt={badge.tooltip} className="h-3.5 w-3.5" />
-                                      </TooltipTrigger>
-                                      <TooltipContent side="top" className="text-xs">{badge.tooltip}</TooltipContent>
-                                    </Tooltip>
-                                  ))}
-                                </div>
+                          <button
+                            onClick={() => trocarConta(token.id)}
+                            disabled={connecting || switchOnCooldown}
+                            className="flex flex-1 min-w-0 items-center gap-2.5 rounded-lg px-2.5 py-2 disabled:opacity-50"
+                          >
+                            <Avatar className="h-8 w-8 shrink-0">
+                              <AvatarImage src={token.avatarUrl} alt={token.label} />
+                              <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                {token.label.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col items-start flex-1 min-w-0">
+                              <div className="flex items-center gap-1 w-full">
+                                <span className="text-[13px] truncate text-left text-foreground/80">
+                                  {token.user?.global_name || token.user?.username || token.label}
+                                </span>
+                                {token.badges && token.badges.length > 0 && (
+                                  <div className="flex items-center gap-px shrink-0">
+                                    {token.badges.map((badge) => (
+                                      <Tooltip key={badge.name}>
+                                        <TooltipTrigger asChild>
+                                          <img src={badge.url} alt={badge.tooltip} className="h-3.5 w-3.5" />
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-xs">{badge.tooltip}</TooltipContent>
+                                      </Tooltip>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              {token.user?.username && token.user?.global_name && (
+                                <span className="text-[10px] text-muted-foreground truncate w-full text-left">
+                                  {token.user.username}
+                                </span>
                               )}
                             </div>
-                            {token.user?.username && token.user?.global_name && (
-                              <span className="text-[10px] text-muted-foreground truncate w-full text-left">
-                                {token.user.username}
-                              </span>
-                            )}
-                          </div>
-                        </button>
+                          </button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => removerConta(token.id)}
+                                className="mr-1 shrink-0 rounded-md p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover/conta:opacity-100"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="text-xs">Remover conta</TooltipContent>
+                          </Tooltip>
+                        </div>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
 
-              <button
-                onClick={() => setContasAbertas(!contasAbertas)}
-                onContextMenu={(e) => handleContextMenu(e, contaAtiva.id)}
-                className="group flex w-full items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-secondary/60"
-              >
-                <div className="relative">
-                  <Avatar className="h-9 w-9 ring-2 ring-primary/30">
-                    <AvatarImage src={contaAtiva.avatarUrl} alt={contaAtiva.label} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                      {contaAtiva.label.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className={cn(
-                    "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-sidebar",
-                    contaAtiva.status === "valid" ? "bg-emerald-500" : contaAtiva.status === "checking" ? "bg-yellow-500" : "bg-red-500"
-                  )} />
-                </div>
-                <div className="flex flex-1 flex-col items-start min-w-0">
-                  <div className="flex items-center gap-1.5 w-full">
-                    <span className="text-sm font-semibold text-foreground truncate text-left">
-                      {contaAtiva.user?.global_name || contaAtiva.user?.username || contaAtiva.label}
-                    </span>
-                    {contaAtiva.badges && contaAtiva.badges.length > 0 && (
-                      <div className="flex items-center gap-0.5 shrink-0">
-                        {contaAtiva.badges.map((badge) => (
-                          <Tooltip key={badge.name}>
-                            <TooltipTrigger asChild>
-                              <img src={badge.url} alt={badge.tooltip} className="h-4 w-4" />
-                            </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">{badge.tooltip}</TooltipContent>
-                          </Tooltip>
-                        ))}
-                      </div>
-                    )}
+              <div className="group flex items-center rounded-xl transition-colors hover:bg-secondary/60">
+                <button
+                  onClick={() => setContasAbertas(!contasAbertas)}
+                  onContextMenu={(e) => handleContextMenu(e, contaAtiva.id)}
+                  className="flex flex-1 min-w-0 items-center gap-3 rounded-xl p-2.5"
+                >
+                  <div className="relative">
+                    <Avatar className="h-9 w-9 ring-2 ring-primary/30">
+                      <AvatarImage src={contaAtiva.avatarUrl} alt={contaAtiva.label} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                        {contaAtiva.label.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className={cn(
+                      "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-sidebar",
+                      contaAtiva.status === "valid" ? "bg-emerald-500" : contaAtiva.status === "checking" ? "bg-yellow-500" : "bg-red-500"
+                    )} />
                   </div>
-                  <span className="text-[11px] text-muted-foreground">
-                    {connecting ? "Conectando..." : switchOnCooldown ? `Aguarde ${cooldownSeconds}s` : contaAtiva.status === "valid" ? "Conectada" : contaAtiva.status === "checking" ? "Verificando..." : "Inválida"}
-                  </span>
-                </div>
-                <ChevronUp size={16} className={cn(
-                  "text-muted-foreground shrink-0 transition-transform duration-200",
-                  contasAbertas && "rotate-180"
-                )} />
-              </button>
+                  <div className="flex flex-1 flex-col items-start min-w-0">
+                    <div className="flex items-center gap-1.5 w-full">
+                      <span className="text-sm font-semibold text-foreground truncate text-left">
+                        {contaAtiva.user?.global_name || contaAtiva.user?.username || contaAtiva.label}
+                      </span>
+                      {contaAtiva.badges && contaAtiva.badges.length > 0 && (
+                        <div className="flex items-center gap-0.5 shrink-0">
+                          {contaAtiva.badges.map((badge) => (
+                            <Tooltip key={badge.name}>
+                              <TooltipTrigger asChild>
+                                <img src={badge.url} alt={badge.tooltip} className="h-4 w-4" />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="text-xs">{badge.tooltip}</TooltipContent>
+                            </Tooltip>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-[11px] text-muted-foreground">
+                      {connecting ? "Conectando..." : switchOnCooldown ? `Aguarde ${cooldownSeconds}s` : contaAtiva.status === "valid" ? "Conectada" : contaAtiva.status === "checking" ? "Verificando..." : "Inválida"}
+                    </span>
+                  </div>
+                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => removerConta(contaAtiva.id)}
+                      className="shrink-0 rounded-md p-1.5 text-muted-foreground opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="text-xs">Remover conta</TooltipContent>
+                </Tooltip>
+                <button
+                  onClick={() => setContasAbertas(!contasAbertas)}
+                  className="shrink-0 rounded-md p-1.5"
+                >
+                  <ChevronUp size={16} className={cn(
+                    "text-muted-foreground transition-transform duration-200",
+                    contasAbertas && "rotate-180"
+                  )} />
+                </button>
+              </div>
             </div>
           ) : (
             <button

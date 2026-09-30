@@ -57,6 +57,10 @@ async function _fetchTokens() {
   }
   _fetchLock = true
   try {
+    if (!_initialFetchDone) {
+      await api.validateAllTokens().catch(() => null)
+    }
+
     const res = await api.getTokens()
     const data = (res.data || []) as TokenInfo[]
     _tokens = data

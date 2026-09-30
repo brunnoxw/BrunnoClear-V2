@@ -136,6 +136,56 @@ router.get('/has-accounts', (_req, res) => {
 })
 
 /**
+ * Revalida todas as tokens cadastradas contra a API do Discord.
+ * Tokens definitivamente inválidas (401/403) são REMOVIDAS automaticamente.
+ * Falhas transitórias (rede, rate-limit) são preservadas para não apagar
+ * contas por queda de internet.
+ * @returns {Object} Contas removidas e total restante
+ */
+router.post('/validate-all', async (_req, res) => {
+  const tokens = [...storage.getTokens()]
+  const removed: Array<{ id: string; label: string; userId?: string }> = []
+
+  for (const token of tokens) {
+    const result = await discord.validateToken(token.token)
+
+    if (result.valid && result.user) {
+      storage.updateToken(token.id, {
+        status: 'valid',
+        user: result.user,
+        lastCheckedAt: new Date().toISOString(),
+      })
+      continue
+    }
+
+    if (result.reason === 'unauthorized') {
+      if (discord.getActiveToken() === token.token) {
+        await discord.disconnect()
+      }
+      if (discord.getSelectedTokenId() === token.id) {
+        discord.setSelectedTokenId(null)
+      }
+      storage.removeToken(token.id)
+      removed.push({ id: token.id, label: token.label, userId: token.user?.id })
+      logger.info('Tokens', `validate-all: token ${token.id} (${token.label}) removida — inválida (401/403)`)
+      continue
+    }
+
+    storage.updateToken(token.id, {
+      status: result.reason === 'rate-limited' ? 'rate-limited' : 'invalid',
+      lastCheckedAt: new Date().toISOString(),
+    })
+    logger.warn('Tokens', `validate-all: token ${token.id} não validada (${result.reason}) — mantida`)
+  }
+
+  res.json({
+    success: true,
+    data: { removed, remaining: storage.getTokens().length },
+    timestamp: new Date().toISOString(),
+  })
+})
+
+/**
  * Retorna a token ativa/selecionada no momento
  * @returns {Object} Dados da conta conectada ou status desconectado
  */

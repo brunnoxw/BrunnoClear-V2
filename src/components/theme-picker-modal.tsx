@@ -43,7 +43,6 @@ function MiniPreview({ theme, cor }: { theme?: ThemeDefinition; cor?: string }) 
       className="h-full w-full rounded-lg overflow-hidden"
       style={{ background: bg }}
     >
-      {/* Sidebar */}
       <div className="flex h-full">
         <div className="w-[22%] h-full flex flex-col gap-1 p-1.5" style={{ background: sidebar, borderRight: `1px solid ${border}` }}>
           <div className="h-1.5 w-3/4 rounded-full" style={{ background: primary }} />
@@ -51,7 +50,6 @@ function MiniPreview({ theme, cor }: { theme?: ThemeDefinition; cor?: string }) 
           <div className="h-1 w-4/5 rounded-full opacity-30" style={{ background: muted }} />
           <div className="h-1 w-full rounded-full opacity-20" style={{ background: muted }} />
         </div>
-        {/* Content */}
         <div className="flex-1 p-1.5 flex flex-col gap-1">
           <div className="h-1.5 w-1/3 rounded-full" style={{ background: fg, opacity: 0.8 }} />
           <div className="flex gap-1 flex-1 mt-0.5">
@@ -88,12 +86,10 @@ export function ThemePickerModal({
 
   return (
     <>
-      {/* Botão trigger */}
       <button
         onClick={() => setOpen(true)}
         className="group flex w-full items-center gap-4 rounded-xl border border-border bg-secondary/20 p-3 transition-all hover:border-primary/40 hover:bg-secondary/30"
       >
-        {/* Mini preview */}
         <div className="h-14 w-24 shrink-0 rounded-lg border border-white/5 overflow-hidden shadow-lg shadow-black/20">
           {tema === "custom" ? (
             <div className="flex h-full w-full items-center justify-center" style={{ background: `linear-gradient(135deg, ${corPainel}15, ${corPainel}05)` }}>
@@ -110,7 +106,6 @@ export function ThemePickerModal({
         <ChevronRight size={16} className="text-muted-foreground shrink-0 transition-transform group-hover:translate-x-0.5" />
       </button>
 
-      {/* Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[680px] max-h-[85vh] p-0 [&>button]:hidden !grid !grid-rows-[auto_1fr]">
           <div className="shrink-0 p-6 pb-0">
@@ -136,7 +131,6 @@ export function ThemePickerModal({
 
           <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {/* Custom */}
             <button
               onClick={() => onSelectTema("custom")}
               className={`group relative flex flex-col rounded-xl border overflow-hidden transition-all ${
@@ -150,7 +144,6 @@ export function ThemePickerModal({
                   <Check size={10} className="text-primary-foreground" strokeWidth={3} />
                 </div>
               )}
-              {/* Preview area */}
               <div className="relative h-20 w-full bg-gradient-to-br from-secondary/60 to-secondary/20 flex items-center justify-center">
                 <div className="flex items-center gap-2">
                   <div
@@ -171,7 +164,6 @@ export function ThemePickerModal({
               </div>
             </button>
 
-            {/* Temas predefinidos */}
             {TEMAS.map((t) => (
               <button
                 key={t.id}
@@ -187,7 +179,6 @@ export function ThemePickerModal({
                     <Check size={10} className="text-primary-foreground" strokeWidth={3} />
                   </div>
                 )}
-                {/* Mini preview do tema */}
                 <div className="relative h-20 w-full">
                   <MiniPreview theme={t} />
                 </div>
@@ -210,7 +201,6 @@ export function ThemePickerModal({
             ))}
           </div>
 
-          {/* Color picker quando Custom está selecionado */}
           {tema === "custom" && (
             <div className="rounded-xl border border-border bg-secondary/10 p-4">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3 block">
