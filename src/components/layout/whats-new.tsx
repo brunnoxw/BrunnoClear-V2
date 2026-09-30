@@ -131,7 +131,7 @@ function parseBody(body: string): ChangeSection[] {
     if (itemMatch) {
       const text = itemMatch[1]
         .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-        .replace(/ by @\S+ in .+$/i, "")
+        .replace(/ by @\S+(?: in .+)?$/i, "")
         .trim()
 
       if (!text) continue
