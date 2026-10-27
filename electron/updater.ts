@@ -118,8 +118,8 @@ export function initUpdater(mainWindow: BrowserWindow) {
   ipcMain.handle('updater:isPackaged', () => app.isPackaged)
 
   ipcMain.handle('updater:getReleaseNotes', async (_event, version?: string) => {
-    if (FORCE_LOCAL_CHANGELOG) {
-      console.log('[WhatsNew] FORCE_LOCAL_CHANGELOG ativo — lendo CHANGELOG.md local')
+    if (FORCE_LOCAL_CHANGELOG || isDev) {
+      console.log(`[WhatsNew] Lendo CHANGELOG.md local (isDev=${isDev}, force=${FORCE_LOCAL_CHANGELOG})`)
       const local = readLocalChangelog(version)
       if (local) return local
     }

@@ -300,7 +300,7 @@ export function WhatsNew() {
       <div className="absolute inset-0 bg-background/85 backdrop-blur-md" onClick={dismiss} />
 
       <div
-        className={`relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/50 transition-all duration-300 ${
+        className={`relative z-10 flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl shadow-black/50 transition-all duration-300 ${
           closing ? "translate-y-6 scale-95 opacity-0" : "translate-y-0 scale-100 opacity-100"
         }`}
       >
@@ -326,13 +326,13 @@ export function WhatsNew() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          <div className="grid items-start gap-2.5 sm:grid-cols-2">
+        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
+          <div className="[column-gap:0.85rem] sm:columns-2">
             {sections.map((section) => {
               const config = sectionConfig[section.type]
               const Icon = config.icon
               return (
-                <div key={section.type} className="overflow-hidden rounded-lg border border-border bg-secondary/20">
+                <div key={section.type} className="mb-3.5 break-inside-avoid overflow-hidden rounded-xl border border-border bg-secondary/20">
                   <div className={`flex items-center gap-1.5 px-3 py-1.5 ${config.bg}`}>
                     <Icon className={`h-3.5 w-3.5 ${config.color}`} />
                     <span className={`text-[11px] font-bold uppercase tracking-wide ${config.color}`}>
