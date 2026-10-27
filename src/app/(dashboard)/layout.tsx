@@ -7,6 +7,7 @@ import { FundoBloom } from "@/components/layout/fundo-bloom"
 import { Onboarding } from "@/components/layout/onboarding"
 import { UpdateBanner } from "@/components/layout/update-banner"
 import { WhatsNew } from "@/components/layout/whats-new"
+import { CommandPalette } from "@/components/layout/command-palette"
 import { api } from "@/lib/api-client"
 import { useCorPainel } from "@/hooks/use-cor-painel"
 import { useRpcPresence } from "@/hooks/use-rpc"
@@ -80,6 +81,7 @@ export default function LayoutDashboard() {
         </div>
       </main>
       <WhatsNew />
+      <CommandPalette />
     </div>
   )
 }

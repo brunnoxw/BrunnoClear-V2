@@ -167,7 +167,7 @@ function AppVersion() {
     }).catch(() => {})
   }, [])
   return (
-    <span className="text-[10px] font-medium leading-none text-primary/60">
+    <span className="self-start rounded border border-primary/15 bg-primary/5 px-1.5 py-0.5 font-mono text-[9px] font-medium leading-none text-muted-foreground">
       v{version}
     </span>
   )
@@ -270,17 +270,21 @@ export function Sidebar() {
   return (
     <>
       <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-border bg-sidebar">
-        <div className="flex h-16 items-center gap-3 border-b border-border px-5">
-          <div className="relative flex h-9 w-9 items-center justify-center">
-            <div className="absolute inset-0 rounded-xl bg-primary/10 blur-sm" />
+        <div
+          className="relative flex h-16 shrink-0 select-none items-center gap-3 border-b border-border bg-background/90 px-5"
+          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-primary/20 to-primary/25" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 p-1">
             <img
               src="/icon.png"
               alt="BrunnoClear"
-              className="relative h-9 w-9 rounded-xl ring-1 ring-border"
+              draggable={false}
+              className="h-8 w-8 rounded-lg object-cover"
             />
           </div>
-          <div className="flex flex-col gap-0.5">
-            <span className="text-base font-bold leading-none tracking-tight text-foreground">
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <span className="text-[15px] font-semibold leading-none tracking-tight text-foreground">
               BrunnoClear
             </span>
             <AppVersion />
