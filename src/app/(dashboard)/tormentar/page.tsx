@@ -16,10 +16,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { GuildPicker } from "@/components/guild-picker"
+import { UserSelect } from "@/components/user-select"
 import { useTokens } from "@/hooks/use-tokens"
 import { useWSEvent } from "@/hooks/use-websocket"
 import { api } from "@/lib/api-client"
-import type { WSToolProgress, WSToolCompleted, WSToolError } from "@/types/websocket"
+import type { WSToolProgress, WSToolCompleted, WSToolError, WSToolWarning } from "@/types/websocket"
 
 type Phase = "idle" | "running" | "completed" | "error"
 
@@ -107,6 +108,7 @@ export default function PaginaTormentar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [guildName, setGuildName] = useState("")
   const [guildIcon, setGuildIcon] = useState<string | null>(null)
+  const [warnings, setWarnings] = useState<string[]>([])
 
   const taskIdRef = useRef<string | null>(null)
   useEffect(() => { taskIdRef.current = taskId }, [taskId])
@@ -125,6 +127,14 @@ export default function PaginaTormentar() {
     if (data.taskId !== taskIdRef.current) return
     setError((data as any).error || "Erro desconhecido")
     setPhase("error")
+  })
+
+  useWSEvent<WSToolWarning>("tool:warning", (data) => {
+    if (data.taskId !== taskIdRef.current) return
+    if (data.flag) {
+      setFlags((prev) => ({ ...prev, [data.flag as keyof TormentFlags]: false }))
+    }
+    setWarnings((prev) => (prev.includes(data.message) ? prev : [...prev.slice(-3), data.message]))
   })
 
   useEffect(() => {
@@ -164,6 +174,7 @@ export default function PaginaTormentar() {
     }
     setStarting(true)
     setError("")
+    setWarnings([])
     try {
       const res = await api.runTool("call-utils", {
         tokenId: activeToken.id,
@@ -239,6 +250,7 @@ export default function PaginaTormentar() {
     setGuildIcon(null)
     setFlags(DEFAULT_FLAGS)
     setNickname("")
+    setWarnings([])
   }
 
   const renderToggleList = (disabled: boolean) => (
@@ -326,21 +338,20 @@ export default function PaginaTormentar() {
                   placeholder="ID do servidor"
                   value={guildId}
                   onChange={(e) => setGuildId(e.target.value)}
-                  className="h-11 border-border bg-secondary/40 font-mono text-sm"
+                  className="h-11 flex-1 border-border bg-secondary/40 font-mono text-sm"
                   disabled={!activeToken}
                 />
-                <GuildPicker onSelect={setGuildId} disabled={!activeToken} />
+                <GuildPicker onSelect={(id) => { setGuildId(id); setUserId("") }} disabled={!activeToken} />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                ID do Usuário Alvo
+                Usuário Alvo
               </label>
-              <Input
-                placeholder="ID do usuário"
+              <UserSelect
+                guildId={guildId}
                 value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                className="h-11 border-border bg-secondary/40 font-mono text-sm"
+                onSelect={(id) => setUserId(id)}
                 disabled={!activeToken}
               />
             </div>
@@ -446,6 +457,17 @@ export default function PaginaTormentar() {
                 ID: {userId}
               </p>
             </div>
+
+            {warnings.length > 0 && (
+              <div className="space-y-2">
+                {warnings.map((w, i) => (
+                  <div key={i} className="flex items-start gap-2.5 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3.5 py-2.5">
+                    <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-400" />
+                    <span className="text-xs text-amber-300/90">{w}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div>
               <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">

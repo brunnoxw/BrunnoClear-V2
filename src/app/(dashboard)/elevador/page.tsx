@@ -1,19 +1,22 @@
 
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Anchor, Loader2, CheckCircle2, AlertTriangle, StopCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ChannelPicker } from "@/components/channel-picker"
+import { GuildPicker } from "@/components/guild-picker"
+import { UserSelect } from "@/components/user-select"
 import { useTokens } from "@/hooks/use-tokens"
 import { useWSEvent } from "@/hooks/use-websocket"
 import { api } from "@/lib/api-client"
-import type { WSToolProgress, WSToolCompleted, WSToolError } from "@/types/websocket"
+import type { WSToolProgress, WSToolCompleted, WSToolError, WSToolWarning } from "@/types/websocket"
 
 type Phase = "idle" | "running" | "completed" | "error"
 
 export default function PaginaElevador() {
   const { activeToken } = useTokens()
+  const [guildId, setGuildId] = useState("")
   const [userId, setUserId] = useState("")
   const [categoryId, setCategoryId] = useState("")
   const [starting, setStarting] = useState(false)
@@ -22,6 +25,7 @@ export default function PaginaElevador() {
   const [taskId, setTaskId] = useState<string | null>(null)
   const [status, setStatus] = useState("")
   const [username, setUsername] = useState("")
+  const [warnings, setWarnings] = useState<string[]>([])
 
   useWSEvent<WSToolProgress>("tool:progress", (data) => {
     if (data.taskId !== taskId) return
@@ -37,6 +41,11 @@ export default function PaginaElevador() {
     if (data.taskId !== taskId) return
     setError((data as any).error || "Erro desconhecido")
     setPhase("error")
+  })
+
+  useWSEvent<WSToolWarning>("tool:warning", (data) => {
+    if (data.taskId !== taskId) return
+    setWarnings((prev) => (prev.includes(data.message) ? prev : [...prev.slice(-3), data.message]))
   })
 
   useEffect(() => {
@@ -64,6 +73,7 @@ export default function PaginaElevador() {
     if (!activeToken || !userId.trim() || !categoryId.trim()) return
     setStarting(true)
     setError("")
+    setWarnings([])
     try {
       const res = await api.runTool("call-utils", {
         tokenId: activeToken.id,
@@ -92,7 +102,7 @@ export default function PaginaElevador() {
     } catch {}
   }
 
-  const handleReset = () => { setPhase("idle"); setError(""); setTaskId(null); setStatus(""); setUsername("") }
+  const handleReset = () => { setPhase("idle"); setError(""); setTaskId(null); setStatus(""); setUsername(""); setWarnings([]) }
 
   if (phase === "idle") {
     return (
@@ -115,20 +125,27 @@ export default function PaginaElevador() {
           </div>
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">ID do Usuário</label>
-              <Input placeholder="ID do usuário alvo" value={userId} onChange={(e) => setUserId(e.target.value)} className="h-11 border-border bg-secondary/40 font-mono text-sm" disabled={!activeToken} />
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">ID do Servidor</label>
+              <div className="flex gap-2">
+                <Input placeholder="ID do servidor" value={guildId} onChange={(e) => setGuildId(e.target.value)} className="h-11 flex-1 border-border bg-secondary/40 font-mono text-sm" disabled={!activeToken} />
+                <GuildPicker onSelect={(id) => { setGuildId(id); setUserId(""); setCategoryId("") }} disabled={!activeToken} />
+              </div>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">ID da Categoria</label>
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Usuário Alvo</label>
+              <UserSelect guildId={guildId} value={userId} onSelect={(id) => setUserId(id)} disabled={!activeToken} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Categoria de canais de voz</label>
               <div className="flex gap-2">
-                <Input placeholder="ID da categoria com canais de voz" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="h-11 border-border bg-secondary/40 font-mono text-sm" disabled={!activeToken} />
-                <ChannelPicker onSelect={setCategoryId} disabled={!activeToken} type="category" />
+                <Input placeholder="ID da categoria" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="h-11 border-border bg-secondary/40 font-mono text-sm" disabled={!activeToken} />
+                <ChannelPicker onSelect={setCategoryId} disabled={!activeToken || !guildId} type="category" guildId={guildId || undefined} />
               </div>
             </div>
           </div>
           <div className="mt-4 flex items-center gap-3 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3">
             <AlertTriangle size={16} className="shrink-0 text-yellow-400" />
-            <span className="text-xs text-yellow-400">O usuário será movido rapidamente entre todos os canais de voz da categoria. O usuário precisa estar em um canal de voz.</span>
+            <span className="text-xs text-yellow-400">O usuário é movido rapidamente entre os canais de voz da categoria. O elevador continua rodando até você clicar em Parar — se o alvo sair da call, ele aguarda e retoma quando voltar.</span>
           </div>
           <div className="mt-6">
             <Button onClick={handleStart} disabled={starting || !activeToken || !userId.trim() || !categoryId.trim()} className="h-11 w-full bg-yellow-600 text-white hover:bg-yellow-700">
@@ -160,6 +177,16 @@ export default function PaginaElevador() {
               <StopCircle size={16} className="mr-2" /> Parar
             </Button>
           </div>
+          {warnings.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {warnings.map((w, i) => (
+                <div key={i} className="flex items-start gap-2.5 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3.5 py-2.5">
+                  <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-400" />
+                  <span className="text-xs text-amber-300/90">{w}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     )

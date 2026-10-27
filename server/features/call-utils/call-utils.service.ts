@@ -17,6 +17,21 @@ interface ActiveCallTask {
 
 const activeCallTasks = new Map<string, ActiveCallTask>()
 
+/** Detecta se um erro do Discord é por falta de permissão. */
+function isPermissionError(err: any): boolean {
+  if (!err) return false
+  return err.code === 50013 || err.code === 50001 || /missing permissions|missing access/i.test(String(err.message || ''))
+}
+
+/**
+ * Emite um aviso em tempo de execução para o painel (ex.: ação falhou por
+ * falta de permissão). `flag` indica qual switch deve ser desligado na UI.
+ */
+function emitPermissionWarning(taskId: string, message: string, flag?: string) {
+  wsManager.broadcast('tool:warning', { taskId, tool: 'call-utils', message, flag })
+  logger.warn('CallUtils', message)
+}
+
 export function getActiveCallTasks() {
   return Array.from(activeCallTasks.entries()).map(([id, t]) => ({
     id,
@@ -448,9 +463,6 @@ async function elevador(client: any, cfg: CallUtilsConfig) {
   if (!membro) {
     throw Object.assign(new Error('Usuário não encontrado no servidor'), { statusCode: 400 })
   }
-  if (!membro.voice.channelId) {
-    throw Object.assign(new Error('Usuário não está em nenhum canal de voz'), { statusCode: 400 })
-  }
 
   const task = taskManager.createTask('call-utils', {
     ...(cfg as unknown as Record<string, unknown>),
@@ -462,6 +474,7 @@ async function elevador(client: any, cfg: CallUtilsConfig) {
 
   let deveContinuar = true
   let movimentos = 0
+  let avisouSemPermissao = false
   const canaisArray = Array.from(canaisVoz.values())
   let indiceAtual = 0
 
@@ -480,9 +493,9 @@ async function elevador(client: any, cfg: CallUtilsConfig) {
     if (!deveContinuar) { clearInterval(intervalId); return }
 
     try {
-      const membroAtualizado = await categoria.guild.members.fetch(userId)
-      if (!membroAtualizado.voice.channelId) {
-        await cleanup()
+      const membroAtualizado = await categoria.guild.members.fetch(userId).catch(() => null)
+      if (!membroAtualizado || !membroAtualizado.voice.channelId) {
+        taskManager.updateProgress(task.id, movimentos, 0, `Elevador aguardando — ${membro.user.tag} não está em call (${movimentos} movimentos)`)
         return
       }
 
@@ -492,8 +505,11 @@ async function elevador(client: any, cfg: CallUtilsConfig) {
       movimentos++
 
       taskManager.updateProgress(task.id, movimentos, 0, `Elevador: ${movimentos} movimentos — ${membro.user.tag}`)
-    } catch {
-      await cleanup()
+    } catch (err: any) {
+      if (isPermissionError(err) && !avisouSemPermissao) {
+        avisouSemPermissao = true
+        emitPermissionWarning(task.id, 'Sem permissão para mover este usuário entre os canais.')
+      }
     }
   }, 1000)
 
@@ -525,17 +541,40 @@ async function coleira(client: any, cfg: CallUtilsConfig) {
     throw Object.assign(new Error('Nenhum usuário válido encontrado'), { statusCode: 400 })
   }
 
+  const anchorId = cfg.anchorUserId?.trim() || client.user.id
+  const seguindoProprio = anchorId === client.user.id
+  let anchorMembro: any = null
+  if (!seguindoProprio) {
+    anchorMembro = await guild.members.fetch(anchorId).catch(() => null)
+    if (!anchorMembro) {
+      throw Object.assign(new Error('Usuário âncora não encontrado no servidor'), { statusCode: 400 })
+    }
+  }
+  const anchorName = seguindoProprio ? 'Você (conta do painel)' : anchorMembro.user.tag
+  const anchorAvatar = seguindoProprio
+    ? (guild.members.me?.user?.displayAvatarURL?.({ format: 'png', size: 64 }) || null)
+    : (anchorMembro.user.displayAvatarURL?.({ format: 'png', size: 64 }) || null)
+
+  const getAnchorChannel = async (): Promise<string | null> => {
+    if (seguindoProprio) return guild.members.me?.voice?.channelId || null
+    const atual = await guild.members.fetch(anchorId).catch(() => null)
+    return atual?.voice?.channelId || null
+  }
+
   const task = taskManager.createTask('call-utils', {
     ...(cfg as unknown as Record<string, unknown>),
     subAction: 'leash',
     usernames: membros.map((m: any) => m.user.tag),
     guildName: guild.name,
     guildIcon,
+    anchorUserId: anchorId,
+    anchorName,
   })
   const controller = taskManager.startTask(task.id)
   if (!controller) throw new Error('Falha ao iniciar task')
 
   let deveContinuar = true
+  let avisouSemPermissao = false
   const puxadasPorUsuario: Record<string, number> = {}
   membros.forEach((m: any) => { puxadasPorUsuario[m.id] = 0 })
 
@@ -551,6 +590,25 @@ async function coleira(client: any, cfg: CallUtilsConfig) {
     logger.info('CallUtils', `Coleira encerrada no servidor ${guild.name}`)
   }
 
+  const reportarProgresso = () => {
+    const totalPuxadas = Object.values(puxadasPorUsuario).reduce((a, b) => a + b, 0)
+    taskManager.updateProgress(task.id, totalPuxadas, 0, `Coleira: ${totalPuxadas} puxadas — perseguindo ${anchorName}`)
+  }
+
+  const puxar = async (membro: any, canalId: string) => {
+    try {
+      if (!canalId || membro.voice?.channelId === canalId) return
+      await membro.voice.setChannel(canalId)
+      puxadasPorUsuario[membro.id] = (puxadasPorUsuario[membro.id] || 0) + 1
+      reportarProgresso()
+    } catch (err: any) {
+      if (isPermissionError(err) && !avisouSemPermissao) {
+        avisouSemPermissao = true
+        emitPermissionWarning(task.id, 'Sem permissão para mover membros neste servidor.')
+      }
+    }
+  }
+
   const voiceUpdateListener = async (oldState: any, newState: any) => {
     if (!deveContinuar) return
     if (!oldState.member || !newState.member) return
@@ -560,46 +618,33 @@ async function coleira(client: any, cfg: CallUtilsConfig) {
 
     if (idsMonitorados.includes(newState.member.id) && oldState.channelId !== newState.channelId) {
       if (newState.guild.id !== guild.id) return
-
-      try {
-        const meuCanal = guild.members.me.voice.channelId
-        if (meuCanal) {
-          if (!newState.channelId || newState.channelId !== meuCanal) {
-            await newState.member.voice.setChannel(meuCanal)
-            puxadasPorUsuario[newState.member.id]++
-            const totalPuxadas = Object.values(puxadasPorUsuario).reduce((a, b) => a + b, 0)
-            taskManager.updateProgress(task.id, totalPuxadas, 0, `Coleira: ${totalPuxadas} puxadas — ${membros.length} usuários`)
-          }
-        }
-      } catch {}
+      const canalAncora = await getAnchorChannel()
+      if (canalAncora) await puxar(newState.member, canalAncora)
     }
 
-    if (newState.member.id === client.user.id) {
-      if (newState.guild.id === guild.id || oldState.guild.id === guild.id) {
-        try {
-          for (const membro of membros) {
-            const membroAtualizado = await guild.members.fetch(membro.id).catch(() => null)
-            if (!membroAtualizado) continue
-            if (newState.channelId && newState.guild.id === guild.id) {
-              if (membroAtualizado.voice.channelId !== newState.channelId) {
-                await membroAtualizado.voice.setChannel(newState.channelId)
-                puxadasPorUsuario[membro.id]++
-              }
-            }
-          }
-          const totalPuxadas = Object.values(puxadasPorUsuario).reduce((a, b) => a + b, 0)
-          taskManager.updateProgress(task.id, totalPuxadas, 0, `Coleira: ${totalPuxadas} puxadas — ${membros.length} usuários`)
-        } catch {}
+    if (newState.member.id === anchorId && newState.guild.id === guild.id && newState.channelId) {
+      for (const membro of membros) {
+        if (membro.id === anchorId) continue
+        const membroAtualizado = await guild.members.fetch(membro.id).catch(() => null)
+        if (membroAtualizado) await puxar(membroAtualizado, newState.channelId)
       }
     }
   }
 
   client.on('voiceStateUpdate', voiceUpdateListener)
 
+  const canalInicial = await getAnchorChannel()
+  if (canalInicial) {
+    for (const membro of membros) {
+      if (membro.id === anchorId) continue
+      await puxar(membro, canalInicial)
+    }
+  }
+
   activeCallTasks.set(`leash-${cfg.guildId}`, { taskId: task.id, type: 'leash', cleanup })
 
-  logger.info('CallUtils', `Coleira ativa: ${membros.length} usuários no servidor ${guild.name}`)
-  return { taskId: task.id, usernames: membros.map((m: any) => m.user.tag), guildName: guild.name, guildIcon }
+  logger.info('CallUtils', `Coleira ativa: ${membros.length} usuários perseguindo ${anchorName} em ${guild.name}`)
+  return { taskId: task.id, usernames: membros.map((m: any) => m.user.tag), guildName: guild.name, guildIcon, anchorName, anchorAvatar }
 }
 
 async function protegerUsuario(client: any, cfg: CallUtilsConfig) {
@@ -635,6 +680,7 @@ async function protegerUsuario(client: any, cfg: CallUtilsConfig) {
   if (!controller) throw new Error('Falha ao iniciar task')
 
   let deveContinuar = true
+  let avisouSemPermissao = false
   const protecoesPorUsuario: Record<string, number> = {}
   membros.forEach((m: any) => { protecoesPorUsuario[m.id] = 0 })
 
@@ -684,7 +730,12 @@ async function protegerUsuario(client: any, cfg: CallUtilsConfig) {
         const totalProtecoes = Object.values(protecoesPorUsuario).reduce((a, b) => a + b, 0)
         taskManager.updateProgress(task.id, totalProtecoes, 0, `Proteção: ${totalProtecoes} ações — ${membros.length} usuários`)
       }
-    } catch {}
+    } catch (err: any) {
+      if (isPermissionError(err) && !avisouSemPermissao) {
+        avisouSemPermissao = true
+        emitPermissionWarning(task.id, 'Sem permissão para desmutar/desensurdecer este usuário.')
+      }
+    }
   }
 
   client.on('voiceStateUpdate', voiceUpdateListener)
@@ -757,31 +808,70 @@ async function tormentar(client: any, cfg: CallUtilsConfig) {
     taskManager.updateConfig(task.id, { flags: { ...flags }, nickname: forcedNick })
   }
 
+  const semPermissao: Record<string, boolean> = {}
+  const tentarAcao = async (flag: keyof typeof flags, label: string, fn: () => Promise<any>): Promise<boolean> => {
+    try {
+      await fn()
+      semPermissao[flag] = false
+      return true
+    } catch (err: any) {
+      if (isPermissionError(err)) {
+        flags[flag] = false
+        if (!semPermissao[flag]) {
+          semPermissao[flag] = true
+          emitPermissionWarning(task.id, `Você está sem permissão para ${label} — ação desativada.`, flag)
+        }
+        updateStatus()
+      }
+      return false
+    }
+  }
+
+  const aplicarAgora = async () => {
+    const m = await guild.members.fetch(userId).catch(() => null)
+    if (!m) return
+
+    if (flags.persistentNick) {
+      const desired = forcedNick || null
+      if ((m.nickname || null) !== desired && await tentarAcao('persistentNick', 'alterar o apelido', () => m.setNickname(desired || ''))) {
+        counters.nick++
+      }
+    }
+    if (flags.autoDisconnect && m.voice?.channelId) {
+      if (await tentarAcao('autoDisconnect', 'desconectar da call', () => m.voice.setChannel(null))) counters.disconnect++
+    } else if (m.voice?.channelId) {
+      if (flags.persistentMute && m.voice.mute === false && await tentarAcao('persistentMute', 'mutar no servidor', () => m.voice.setMute(true))) counters.mute++
+      if (flags.persistentDeaf && m.voice.deaf === false && await tentarAcao('persistentDeaf', 'ensurdecer no servidor', () => m.voice.setDeaf(true))) counters.deaf++
+    }
+    updateStatus()
+  }
+
   const voiceListener = async (oldState: any, newState: any) => {
     if (!deveContinuar) return
     if (!oldState.member || !newState.member) return
     if (newState.member.id !== userId) return
     if (newState.guild?.id !== guild.id) return
 
-    try {
-      if (flags.persistentMute && newState.channelId && newState.mute === false) {
-        await newState.member.voice.setMute(true).catch(() => {})
+    if (flags.persistentMute && newState.channelId && newState.mute === false) {
+      if (await tentarAcao('persistentMute', 'mutar no servidor', () => newState.member.voice.setMute(true))) {
         counters.mute++
         updateStatus()
       }
+    }
 
-      if (flags.persistentDeaf && newState.channelId && newState.deaf === false) {
-        await newState.member.voice.setDeaf(true).catch(() => {})
+    if (flags.persistentDeaf && newState.channelId && newState.deaf === false) {
+      if (await tentarAcao('persistentDeaf', 'ensurdecer no servidor', () => newState.member.voice.setDeaf(true))) {
         counters.deaf++
         updateStatus()
       }
+    }
 
-      if (flags.autoDisconnect && newState.channelId && oldState.channelId !== newState.channelId) {
-        await newState.member.voice.setChannel(null).catch(() => {})
+    if (flags.autoDisconnect && newState.channelId && oldState.channelId !== newState.channelId) {
+      if (await tentarAcao('autoDisconnect', 'desconectar da call', () => newState.member.voice.setChannel(null))) {
         counters.disconnect++
         updateStatus()
       }
-    } catch {}
+    }
   }
 
   const memberUpdateListener = async (oldMember: any, newMember: any) => {
@@ -790,15 +880,14 @@ async function tormentar(client: any, cfg: CallUtilsConfig) {
     if (newMember.guild?.id !== guild.id) return
     if (!flags.persistentNick) return
 
-    try {
-      const desired = forcedNick || null
-      const current = newMember.nickname || null
-      if (current !== desired) {
-        await newMember.setNickname(desired || '').catch(() => {})
+    const desired = forcedNick || null
+    const current = newMember.nickname || null
+    if (current !== desired) {
+      if (await tentarAcao('persistentNick', 'alterar o apelido', () => newMember.setNickname(desired || ''))) {
         counters.nick++
         updateStatus()
       }
-    } catch {}
+    }
   }
 
   const messageListener = async (message: any) => {
@@ -806,11 +895,10 @@ async function tormentar(client: any, cfg: CallUtilsConfig) {
     if (!flags.blacklistChat) return
     if (message.author?.id !== userId) return
     if (message.guild?.id !== guild.id) return
-    try {
-      await message.delete().catch(() => {})
+    if (await tentarAcao('blacklistChat', 'deletar mensagens', () => message.delete())) {
       counters.chat++
       updateStatus()
-    } catch {}
+    }
   }
 
   const cleanup = async () => {
@@ -844,22 +932,7 @@ async function tormentar(client: any, cfg: CallUtilsConfig) {
       forcedNick = newNickname.trim()
     }
 
-    if (flags.persistentNick) {
-      const desired = forcedNick || null
-      const current = membro.nickname || null
-      if (current !== desired) {
-        membro.setNickname(desired || '').catch(() => {})
-      }
-    }
-    if (flags.persistentMute && membro.voice?.channelId && membro.voice.mute === false) {
-      membro.voice.setMute(true).catch(() => {})
-    }
-    if (flags.persistentDeaf && membro.voice?.channelId && membro.voice.deaf === false) {
-      membro.voice.setDeaf(true).catch(() => {})
-    }
-    if (flags.autoDisconnect && membro.voice?.channelId) {
-      membro.voice.setChannel(null).catch(() => {})
-    }
+    void aplicarAgora()
 
     updateStatus()
     return { flags: { ...flags }, nickname: forcedNick }
@@ -877,6 +950,7 @@ async function tormentar(client: any, cfg: CallUtilsConfig) {
   })
 
   updateStatus()
+  void aplicarAgora()
   logger.info('CallUtils', `Tormento iniciado para ${membro.user.tag} em ${guild.name}`)
 
   return {

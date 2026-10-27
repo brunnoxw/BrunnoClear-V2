@@ -28,6 +28,7 @@ const callUtilsSchema = z.object({
   guildId: z.string().optional(),
   userIds: z.array(z.string()).optional(),
   categoryId: z.string().optional(),
+  anchorUserId: z.string().optional(),
   selfMute: z.boolean().optional(),
   selfDeaf: z.boolean().optional(),
   flags: z.object({

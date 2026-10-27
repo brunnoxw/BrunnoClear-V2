@@ -18,6 +18,7 @@ export type WSServerEvent =
   | 'tool:progress'
   | 'tool:completed'
   | 'tool:error'
+  | 'tool:warning'
   | 'tool:log'
   | 'token:status'
   | 'token:updated'
@@ -76,6 +77,14 @@ export interface WSToolError {
   taskId: string
   tool: ToolType
   error: string
+}
+
+export interface WSToolWarning {
+  taskId: string
+  tool: ToolType
+  message: string
+  /** Switch/flag que deve ser desligado na UI, quando aplicável. */
+  flag?: string
 }
 
 export interface WSLogEntry {

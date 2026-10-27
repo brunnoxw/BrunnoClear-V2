@@ -1,21 +1,25 @@
 
 
 import { useState, useEffect } from "react"
-import { Link2, Loader2, CheckCircle2, AlertTriangle, StopCircle, Plus, X } from "lucide-react"
+import { Link2, Loader2, CheckCircle2, AlertTriangle, StopCircle, Crosshair } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { GuildPicker } from "@/components/guild-picker"
+import { UserPicker, memberAvatar, memberName } from "@/components/user-picker"
+import { UserSelect } from "@/components/user-select"
+import { TargetProfileCard } from "@/components/target-profile-card"
 import { useTokens } from "@/hooks/use-tokens"
 import { useWSEvent } from "@/hooks/use-websocket"
 import { api } from "@/lib/api-client"
-import type { WSToolProgress, WSToolCompleted, WSToolError } from "@/types/websocket"
+import type { WSToolProgress, WSToolCompleted, WSToolError, WSToolWarning } from "@/types/websocket"
+import type { DiscordMember } from "@/types/discord"
 
 type Phase = "idle" | "running" | "completed" | "error"
 
 export default function PaginaColeira() {
   const { activeToken } = useTokens()
-  const [userIdInput, setUserIdInput] = useState("")
-  const [userIds, setUserIds] = useState<string[]>([])
+  const [targets, setTargets] = useState<DiscordMember[]>([])
+  const [anchorId, setAnchorId] = useState("")
   const [guildId, setGuildId] = useState("")
   const [starting, setStarting] = useState(false)
   const [phase, setPhase] = useState<Phase>("idle")
@@ -25,6 +29,9 @@ export default function PaginaColeira() {
   const [usernames, setUsernames] = useState<string[]>([])
   const [guildName, setGuildName] = useState("")
   const [guildIcon, setGuildIcon] = useState<string | null>(null)
+  const [anchorName, setAnchorName] = useState("")
+  const [warnings, setWarnings] = useState<string[]>([])
+
   useWSEvent<WSToolProgress>("tool:progress", (data) => {
     if (data.taskId !== taskId) return
     setStatus(data.message)
@@ -41,6 +48,11 @@ export default function PaginaColeira() {
     setPhase("error")
   })
 
+  useWSEvent<WSToolWarning>("tool:warning", (data) => {
+    if (data.taskId !== taskId) return
+    setWarnings((prev) => (prev.includes(data.message) ? prev : [...prev.slice(-3), data.message]))
+  })
+
   useEffect(() => {
     api.getTasks().then(res => {
       const tasks = ((res as any).data || []) as any[]
@@ -54,6 +66,7 @@ export default function PaginaColeira() {
         setUsernames(running.config?.usernames || [])
         setGuildName(running.config?.guildName || '')
         setGuildIcon(running.config?.guildIcon || null)
+        setAnchorName(running.config?.anchorName || '')
         if (running.results?.length > 0) {
           setStatus(running.results[running.results.length - 1].message)
         } else {
@@ -64,34 +77,30 @@ export default function PaginaColeira() {
     }).catch(() => {})
   }, [])
 
-  const addUserId = () => {
-    const id = userIdInput.trim()
-    if (id && !userIds.includes(id)) {
-      setUserIds((prev) => [...prev, id])
-      setUserIdInput("")
-    }
+  const addTarget = (m: DiscordMember) => {
+    setTargets((prev) => (prev.some((t) => t.id === m.id) ? prev : [...prev, m]))
   }
-
-  const removeUserId = (id: string) => {
-    setUserIds((prev) => prev.filter((uid) => uid !== id))
-  }
+  const removeTarget = (id: string) => setTargets((prev) => prev.filter((t) => t.id !== id))
 
   const handleStart = async () => {
-    if (!activeToken || userIds.length === 0 || !guildId.trim()) return
+    if (!activeToken || targets.length === 0 || !guildId.trim()) return
     setStarting(true)
     setError("")
+    setWarnings([])
     try {
       const res = await api.runTool("call-utils", {
         tokenId: activeToken.id,
         action: "leash",
-        userIds,
+        userIds: targets.map((t) => t.id),
         guildId: guildId.trim(),
+        anchorUserId: anchorId.trim() || undefined,
       })
-      const data = res.data as { taskId: string; usernames: string[]; guildName: string; guildIcon: string | null }
+      const data = res.data as { taskId: string; usernames: string[]; guildName: string; guildIcon: string | null; anchorName?: string }
       setTaskId(data.taskId)
       setUsernames(data.usernames)
       setGuildName(data.guildName || '')
       setGuildIcon(data.guildIcon || null)
+      setAnchorName(data.anchorName || '')
       setStatus(`Coleira ativa: ${data.usernames.length} usuários`)
       setPhase("running")
     } catch (err: unknown) {
@@ -110,7 +119,10 @@ export default function PaginaColeira() {
     } catch {}
   }
 
-  const handleReset = () => { setPhase("idle"); setError(""); setTaskId(null); setStatus(""); setUsernames([]); setGuildName(""); setGuildIcon(null) }
+  const handleReset = () => {
+    setPhase("idle"); setError(""); setTaskId(null); setStatus(""); setUsernames([])
+    setGuildName(""); setGuildIcon(null); setAnchorName(""); setWarnings([])
+  }
 
   if (phase === "idle") {
     return (
@@ -128,43 +140,59 @@ export default function PaginaColeira() {
             </div>
             <div>
               <h2 className="text-sm font-semibold text-foreground">Coleira</h2>
-              <p className="text-xs text-muted-foreground">Mantém usuários presos no mesmo canal de voz que você</p>
+              <p className="text-xs text-muted-foreground">Mantém usuários presos no mesmo canal de voz do alvo âncora</p>
             </div>
           </div>
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">ID do Servidor</label>
               <div className="flex gap-2">
-                <Input placeholder="ID do servidor" value={guildId} onChange={(e) => setGuildId(e.target.value)} className="h-11 border-border bg-secondary/40 font-mono text-sm" disabled={!activeToken} />
-                <GuildPicker onSelect={setGuildId} disabled={!activeToken} />
+                <Input placeholder="ID do servidor" value={guildId} onChange={(e) => setGuildId(e.target.value)} className="h-11 flex-1 border-border bg-secondary/40 font-mono text-sm" disabled={!activeToken} />
+                <GuildPicker onSelect={(id) => { setGuildId(id); setTargets([]); setAnchorId("") }} disabled={!activeToken} />
               </div>
             </div>
+
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Usuários Alvo</label>
-              <div className="flex gap-2">
-                <Input placeholder="ID do usuário" value={userIdInput} onChange={(e) => setUserIdInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addUserId()} className="h-11 flex-1 border-border bg-secondary/40 font-mono text-sm" disabled={!activeToken} />
-                <Button onClick={addUserId} variant="outline" className="h-11 px-3" disabled={!userIdInput.trim() || !activeToken}>
-                  <Plus size={16} />
-                </Button>
-              </div>
-              {userIds.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {userIds.map((id) => (
-                    <span key={id} className="inline-flex items-center gap-1.5 rounded-md bg-secondary/60 px-2.5 py-1 text-xs font-mono text-foreground">
-                      {id}
-                      <button onClick={() => removeUserId(id)} className="text-muted-foreground hover:text-red-400"><X size={12} /></button>
-                    </span>
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Usuários na coleira</label>
+              <UserPicker
+                guildId={guildId}
+                onSelect={addTarget}
+                excludeIds={targets.map((t) => t.id)}
+                disabled={!activeToken}
+                placeholder="Colar ID do usuário"
+              />
+              {targets.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  {targets.map((m) => (
+                    <TargetProfileCard
+                      key={m.id}
+                      userId={m.id}
+                      fallbackName={memberName(m)}
+                      fallbackAvatar={memberAvatar(m)}
+                      onRemove={() => removeTarget(m.id)}
+                    />
                   ))}
                 </div>
               )}
             </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <Crosshair size={12} className="text-indigo-400" /> Perseguir (âncora)
+              </label>
+              <UserSelect guildId={guildId} value={anchorId} onSelect={(id) => setAnchorId(id)} disabled={!activeToken} placeholder="Você (conta do painel) — padrão" />
+              <p className="text-[11px] text-muted-foreground/70">
+                Deixe vazio para os alvos perseguirem a sua conta. Ou escolha outro usuário do servidor para eles perseguirem.
+              </p>
+            </div>
           </div>
+
           <div className="mt-4 flex items-center gap-3 rounded-lg border border-indigo-500/20 bg-indigo-500/5 p-3">
             <Link2 size={16} className="shrink-0 text-indigo-400" />
-            <span className="text-xs text-indigo-400">Os usuários serão puxados de volta ao seu canal de voz sempre que tentarem sair. Você precisa estar em um canal de voz.</span>
+            <span className="text-xs text-indigo-400">Os usuários são puxados para o canal de voz do âncora sempre que tentarem sair. O âncora precisa estar em um canal de voz.</span>
           </div>
           <div className="mt-6">
-            <Button onClick={handleStart} disabled={starting || !activeToken || userIds.length === 0 || !guildId.trim()} className="h-11 w-full bg-indigo-600 text-white hover:bg-indigo-700">
+            <Button onClick={handleStart} disabled={starting || !activeToken || targets.length === 0 || !guildId.trim()} className="h-11 w-full bg-indigo-600 text-white hover:bg-indigo-700">
               {starting ? <Loader2 size={18} className="mr-2 animate-spin" /> : <Link2 size={18} className="mr-2" />}
               Ativar Coleira
             </Button>
@@ -197,6 +225,11 @@ export default function PaginaColeira() {
                     <Link2 size={12} className="text-indigo-400" />
                     {usernames.length} usuário(s) na coleira
                   </p>
+                  {anchorName && (
+                    <p className="text-xs text-muted-foreground/80 flex items-center gap-1.5 mt-0.5">
+                      <Crosshair size={11} className="text-indigo-400" /> Perseguindo: {anchorName}
+                    </p>
+                  )}
                 </div>
               </div>
               <Button onClick={handleStop} variant="outline" size="sm" className="h-9 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300">
@@ -204,7 +237,7 @@ export default function PaginaColeira() {
               </Button>
             </div>
           </div>
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-6 space-y-4">
             <div className="rounded-xl bg-secondary/10 border border-border/30 p-6">
               <div className="flex items-center justify-center gap-3 mb-2">
                 <div className="relative">
@@ -218,6 +251,12 @@ export default function PaginaColeira() {
                 <p className="text-center text-xs text-muted-foreground/70 mt-1">Alvos: {usernames.join(", ")}</p>
               )}
             </div>
+            {warnings.length > 0 && warnings.map((w, i) => (
+              <div key={i} className="flex items-start gap-2.5 rounded-lg border border-amber-500/25 bg-amber-500/10 px-3.5 py-2.5">
+                <AlertTriangle size={15} className="mt-0.5 shrink-0 text-amber-400" />
+                <span className="text-xs text-amber-300/90">{w}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

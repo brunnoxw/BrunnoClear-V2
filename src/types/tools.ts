@@ -141,6 +141,7 @@ export interface CallUtilsConfig {
   guildId?: string
   userIds?: string[]
   categoryId?: string
+  anchorUserId?: string
   selfMute?: boolean
   selfDeaf?: boolean
   flags?: TormentFlags
