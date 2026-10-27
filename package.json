@@ -1,6 +1,6 @@
 {
   "name": "brunnoclear",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "private": false,
   "main": "dist-electron/electron/main.js",
   "scripts": {
