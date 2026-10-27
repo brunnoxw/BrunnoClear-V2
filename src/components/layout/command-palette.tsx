@@ -5,8 +5,10 @@ import {
   LayoutDashboard, User, BarChart3, Trash2, Package, MessageSquare, PhoneOff,
   UserMinus, LogOut, Copy, Image, MoveRight, Timer, MicOff, VolumeX, Users,
   Anchor, Shield, Crosshair, PieChart, Archive, Radio, BellRing, Settings,
-  ListTodo, Terminal, Gamepad2, Search,
+  ListTodo, Terminal, Gamepad2, Search, X,
 } from "lucide-react"
+import { ThemedIcon } from "@/components/themed-icon"
+import { xpIconForRoute } from "@/lib/xp-icons"
 
 interface PaletteItem {
   label: string
@@ -125,15 +127,22 @@ export function CommandPalette() {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[9998] flex items-start justify-center p-4 pt-[12vh]">
+    <div className="command-palette-overlay fixed inset-0 z-[9998] flex items-start justify-center p-4 pt-[12vh]">
       <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
       <Command
         label="Command palette"
         loop
-        className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl shadow-black/50 animate-in fade-in-0 zoom-in-95"
+        className="command-palette-window relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl shadow-black/50 animate-in fade-in-0 zoom-in-95"
       >
-        <div className="flex items-center gap-2.5 border-b border-border px-4">
-          <Search size={16} className="shrink-0 text-muted-foreground" />
+        <div className="command-palette-titlebar theme-xp-only">
+          <ThemedIcon name="run"><Search size={16} /></ThemedIcon>
+          <span>Executar — BrunnoClear</span>
+          <button type="button" data-window-action="close" onClick={() => setOpen(false)} aria-label="Fechar busca" title="Fechar">
+            <X size={16} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="command-palette-search flex items-center gap-2.5 border-b border-border px-4">
+          <ThemedIcon name="search" className="text-muted-foreground"><Search size={16} /></ThemedIcon>
           <Command.Input
             autoFocus
             placeholder="Buscar páginas e ferramentas..."
@@ -160,7 +169,7 @@ export function CommandPalette() {
                     onSelect={() => go(item.href)}
                     className="flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-sm text-foreground data-[selected=true]:bg-secondary data-[selected=true]:text-foreground"
                   >
-                    <Icon size={16} className="shrink-0 text-muted-foreground" />
+                    <ThemedIcon name={xpIconForRoute(item.href)} className="text-muted-foreground"><Icon size={16} /></ThemedIcon>
                     <span className="flex-1">{item.label}</span>
                   </Command.Item>
                 )

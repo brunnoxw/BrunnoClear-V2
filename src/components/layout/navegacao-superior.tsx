@@ -2,6 +2,7 @@
 
 import { Link, useLocation } from "react-router-dom"
 import { ChevronRight, Command, Home, Minus, Square, X } from "lucide-react"
+import { ThemedIcon } from "@/components/themed-icon"
 
 interface ItemBreadcrumb {
   titulo: string
@@ -85,12 +86,12 @@ export function NavegacaoSuperior() {
 
   return (
     <header
-      className="sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 border-b border-border bg-background/90 px-4 backdrop-blur-xl lg:gap-6 lg:px-6"
+      className="app-header sticky top-0 z-30 grid h-16 shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 border-b border-border bg-background/90 px-4 backdrop-blur-xl lg:gap-6 lg:px-6"
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-primary/25 via-primary/5 to-transparent" />
 
-      <nav aria-label="Navegação estrutural" className="min-w-0">
+      <nav aria-label="Navegação estrutural" className="app-breadcrumb min-w-0">
         <ol className="flex min-w-0 items-center gap-3">
           <li className="shrink-0">
             <Link
@@ -100,7 +101,7 @@ export function NavegacaoSuperior() {
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary transition-colors hover:border-primary/30 hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             >
-              <Home size={15} strokeWidth={1.8} aria-hidden="true" />
+              <ThemedIcon name="computer"><Home size={15} strokeWidth={1.8} /></ThemedIcon>
             </Link>
           </li>
           {breadcrumbs.slice(1, -1).map((item) => (
@@ -128,29 +129,30 @@ export function NavegacaoSuperior() {
       <button
         type="button"
         onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-        className="flex h-8 items-center justify-center gap-2.5 rounded-lg border border-border bg-secondary/40 px-2.5 text-xs text-muted-foreground transition-colors hover:border-primary/20 hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:w-48 lg:justify-start xl:w-64"
+        className="app-command-trigger flex h-8 items-center justify-center gap-2.5 rounded-lg border border-border bg-secondary/40 px-2.5 text-xs text-muted-foreground transition-colors hover:border-primary/20 hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:w-48 lg:justify-start xl:w-64"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         aria-label="Buscar páginas e ações"
         aria-keyshortcuts="Control+k Meta+k"
         title="Buscar (Ctrl+K)"
       >
-        <Command size={14} aria-hidden="true" />
+        <ThemedIcon name="run"><Command size={14} /></ThemedIcon>
         <span className="hidden lg:inline">Buscar no painel</span>
         <kbd aria-hidden="true" className="ml-auto hidden h-5 items-center rounded border border-border bg-background/80 px-1.5 font-mono text-[10px] text-muted-foreground lg:inline-flex">Ctrl K</kbd>
       </button>
 
       <div className="flex items-center justify-self-end gap-3" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-        <div className="flex h-7 items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-2.5" aria-label="Status: online">
+        <div className="app-connection-status flex h-7 items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-2.5" aria-label="Status: online">
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary ring-[3px] ring-primary/10" aria-hidden="true" />
           <span className="hidden text-[11px] font-medium text-foreground/80 sm:inline">Online</span>
         </div>
 
         {typeof window !== 'undefined' && window.electronAPI && (
-          <div className="flex items-center gap-1 border-l border-border pl-3" role="group" aria-label="Controles da janela">
+          <div className="app-window-controls flex items-center gap-1 border-l border-border pl-3" role="group" aria-label="Controles da janela">
             <button
               type="button"
               onClick={() => window.electronAPI?.window.minimize()}
               aria-label="Minimizar janela"
+              data-window-action="minimize"
               title="Minimizar"
               className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
@@ -160,6 +162,7 @@ export function NavegacaoSuperior() {
               type="button"
               onClick={() => window.electronAPI?.window.maximize()}
               aria-label="Maximizar ou restaurar janela"
+              data-window-action="maximize"
               title="Maximizar ou restaurar"
               className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
@@ -169,6 +172,7 @@ export function NavegacaoSuperior() {
               type="button"
               onClick={() => window.electronAPI?.window.close()}
               aria-label="Fechar janela"
+              data-window-action="close"
               title="Fechar"
               className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive hover:text-destructive-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
             >

@@ -1,0 +1,900 @@
+/* Luna: opaque surfaces, beveled controls and Explorer task panes. */
+:root[data-theme="windows-xp"] {
+  color-scheme: light;
+  --font-sans: Tahoma, 'Trebuchet MS', Arial, sans-serif;
+  --font-mono: 'Lucida Console', 'Courier New', monospace;
+  --default-font-family: Tahoma, Arial, sans-serif;
+  --radius: 0.25rem;
+  --scrollbar-track: #f1efe2;
+  --scrollbar-thumb: #c2d3f5;
+  --scrollbar-thumb-hover: #a5c0f3;
+  --xp-titlebar: linear-gradient(180deg, #5ba2ff 0%, #2f83f5 5%, #0861eb 13%, #0054e3 45%, #0050d7 85%, #0349c3 100%);
+  --xp-button: linear-gradient(180deg, #fff 0%, #faf9f6 48%, #ecebe5 100%);
+  --xp-window-border: #0855dd;
+}
+
+:root[data-theme="windows-xp"] body {
+  font-family: Tahoma, 'Trebuchet MS', Arial, sans-serif;
+}
+
+:root[data-theme="windows-xp"] :is(button, input, select, textarea, label, .font-sans) {
+  font-family: Tahoma, Arial, sans-serif;
+}
+
+:root[data-theme="windows-xp"] :is(h1, h2, h3, h4, h5, h6) {
+  font-family: 'Trebuchet MS', Tahoma, Arial, sans-serif;
+}
+
+:root[data-theme="windows-xp"] :is(.bloom-verde, .bloom-grade, .theme-bg-overlay) {
+  display: none;
+}
+
+:root[data-theme="windows-xp"] .texto-neon {
+  text-shadow: none;
+}
+
+:root[data-theme="windows-xp"] .borda-neon {
+  box-shadow: none;
+}
+
+:root[data-theme="windows-xp"] :is(.app-header, .app-sidebar, .app-content, [data-slot="card"], [class*="bg-card/"], [data-slot="dialog-content"], .command-palette-window) {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-theme="windows-xp"] :is(.theme-icon-default) {
+  display: none;
+}
+
+:root[data-theme="windows-xp"] .theme-icon-xp {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: none;
+}
+
+/* Explorer navigation: a blue shell containing pale task groups. */
+:root[data-theme="windows-xp"] .app-sidebar {
+  height: calc(100dvh - 34px);
+  background: linear-gradient(180deg, #7ba2e7 64px, #6389db 55%, #4366be);
+  border-right: 2px solid #0b48b7;
+  box-shadow: inset -1px 0 #bed6ff;
+}
+
+:root[data-theme="windows-xp"] :is(.app-brand, .app-header) {
+  background: var(--xp-titlebar);
+  border-bottom: 1px solid #003caa;
+  box-shadow: inset 0 1px #78b4ff, inset 0 -1px #0046c6;
+}
+
+:root[data-theme="windows-xp"] .app-brand {
+  padding-inline: 17px;
+}
+
+:root[data-theme="windows-xp"] .app-brand > div:has(> img) {
+  padding: 2px;
+  border: 1px solid #d0e6ff;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 1px 1px 1px #003c9b;
+}
+
+:root[data-theme="windows-xp"] .app-brand img {
+  border-radius: 2px;
+}
+
+:root[data-theme="windows-xp"] .app-brand-name {
+  color: #fff;
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-shadow: 1px 1px #003d9d;
+}
+
+:root[data-theme="windows-xp"] .app-version {
+  color: #e6f0ff;
+  background: transparent;
+  border-color: transparent;
+  padding: 0;
+  font-family: Tahoma, Arial, sans-serif;
+  font-size: 10px;
+}
+
+:root[data-theme="windows-xp"] .app-sidebar-nav {
+  padding: 14px 12px;
+}
+
+:root[data-theme="windows-xp"] .app-nav-section {
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid #fff;
+  border-radius: 4px 4px 0 0;
+  background: #d6dff7;
+  box-shadow: 0 1px 1px #375bab44;
+}
+
+:root[data-theme="windows-xp"] :is(.app-section-toggle, .app-section-label) {
+  min-height: 33px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 0;
+  color: #215dc6;
+  background: linear-gradient(90deg, #fff, #eff4ff 55%, #c4d4f5);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+:root[data-theme="windows-xp"] :is(.app-section-toggle, .app-section-label) > span {
+  color: inherit;
+}
+
+:root[data-theme="windows-xp"] .app-section-toggle:hover {
+  color: #003a9e;
+  background: linear-gradient(90deg, #fff, #f5f8ff 55%, #d8e6ff);
+}
+
+:root[data-theme="windows-xp"] .app-section-toggle > svg:last-child {
+  width: 17px;
+  height: 17px;
+  padding: 2px;
+  color: #3769b6;
+  background: linear-gradient(#fff, #d9e6fc);
+  border: 1px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 1px #809bcb;
+}
+
+:root[data-theme="windows-xp"] .app-nav-section ul {
+  padding: 5px;
+}
+
+:root[data-theme="windows-xp"] .app-nav-link {
+  min-height: 34px;
+  padding: 6px 8px;
+  gap: 9px;
+  color: #1b4da3;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  box-shadow: none;
+}
+
+:root[data-theme="windows-xp"] .app-nav-link:hover {
+  color: #003c9b;
+  background: #edf3ff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+:root[data-theme="windows-xp"] .app-nav-link[aria-current="page"] {
+  color: #fff;
+  background: linear-gradient(#367de6, #245edb);
+  border-color: #174eb7;
+  box-shadow: inset 0 1px #80a9f4;
+  text-decoration: none;
+}
+
+:root[data-theme="windows-xp"] .app-nav-link[aria-current="page"] > span {
+  color: inherit;
+}
+
+:root[data-theme="windows-xp"] .app-account-panel {
+  background: linear-gradient(#2878e7, #1556c8);
+  border-top: 1px solid #003da5;
+  box-shadow: inset 0 1px #80b5ff;
+  color: #fff;
+}
+
+:root[data-theme="windows-xp"] .app-account-panel :is([class*="text-foreground"], [class*="text-muted-foreground"]) {
+  color: #fff;
+}
+
+:root[data-theme="windows-xp"] .app-account-panel [data-slot="avatar"] {
+  border: 2px solid #fff;
+  border-radius: 4px;
+  box-shadow: 1px 1px 2px #00377b;
+}
+
+:root[data-theme="windows-xp"] .app-account-panel button:hover {
+  background: #ffffff20;
+}
+
+/* The centered command launcher remains an interactive, no-drag control. */
+:root[data-theme="windows-xp"] .app-header {
+  border-radius: 0;
+  color: #fff;
+}
+
+:root[data-theme="windows-xp"] .app-breadcrumb :is(h1, a, svg) {
+  color: #fff;
+}
+
+:root[data-theme="windows-xp"] .app-breadcrumb h1 {
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+  font-size: 16px;
+  text-shadow: 1px 1px #003b9f;
+}
+
+:root[data-theme="windows-xp"] .app-breadcrumb li:first-child a {
+  background: linear-gradient(#ffffff30, #ffffff0a);
+  border-color: #83b3ff;
+  border-radius: 3px;
+  box-shadow: inset 0 1px #ffffff40;
+}
+
+:root[data-theme="windows-xp"] .app-command-trigger {
+  height: 31px;
+  color: #304363;
+  border: 1px solid #00399e;
+  border-radius: 3px;
+  background: linear-gradient(#edf3ff, #fff 35%);
+  box-shadow: inset 1px 1px #9db5db, 0 1px #82b5ff;
+}
+
+:root[data-theme="windows-xp"] .app-command-trigger:hover {
+  color: #003da6;
+  background: #fff;
+  border-color: #ffcf67;
+}
+
+:root[data-theme="windows-xp"] .app-command-trigger kbd {
+  color: #58677e;
+  background: #f2f1eb;
+  border-color: #b8bbc1;
+  border-radius: 2px;
+  font-family: Tahoma, Arial, sans-serif;
+  box-shadow: inset 0 1px #fff;
+}
+
+:root[data-theme="windows-xp"] .app-connection-status {
+  color: #fff;
+  border: 1px solid #0d48b8;
+  border-radius: 3px;
+  background: #0b58cd;
+  box-shadow: inset 0 1px #2779ea;
+}
+
+:root[data-theme="windows-xp"] .app-connection-status > span:first-child {
+  background: #8ce35c;
+  box-shadow: 0 0 0 1px #175929, inset 0 1px #e3ffd4;
+}
+
+:root[data-theme="windows-xp"] .app-connection-status > span:last-child {
+  color: #fff;
+}
+
+:root[data-theme="windows-xp"] .app-window-controls {
+  gap: 3px;
+  border-color: #6ca5ff;
+}
+
+:root[data-theme="windows-xp"] .app-window-controls button {
+  width: 25px;
+  height: 25px;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  color: #fff;
+  background: linear-gradient(135deg, #88b4fa, #3778df 48%, #1e5bca);
+  box-shadow: inset 1px 1px #b4d0ff, inset -1px -1px #16418d, 1px 1px #003692;
+}
+
+:root[data-theme="windows-xp"] .app-window-controls button[data-window-action="close"] {
+  background: linear-gradient(135deg, #f4af99, #e66346 45%, #d23119);
+  box-shadow: inset 1px 1px #f8c3b2, inset -1px -1px #a02713, 1px 1px #003692;
+}
+
+:root[data-theme="windows-xp"] .app-window-controls button:hover {
+  filter: brightness(1.12);
+}
+
+:root[data-theme="windows-xp"] .app-window-controls button:active {
+  box-shadow: inset 1px 1px 2px #002d81;
+}
+
+:root[data-theme="windows-xp"] .app-window-controls svg {
+  stroke-width: 2.8;
+}
+
+/* Bliss is visible around each opaque application window. */
+:root[data-theme="windows-xp"] .app-main {
+  height: calc(100dvh - 34px);
+  background-color: #3b81c5;
+  background-image: linear-gradient(#8ec4ef0a, #184a8112), url('/themes/windows-xp/bliss.jpg');
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+:root[data-theme="windows-xp"] .app-content {
+  padding: 24px;
+}
+
+:root[data-theme="windows-xp"] .app-content > div:has(h1) {
+  padding: 20px;
+  border: 3px solid var(--xp-window-border);
+  border-top-width: 1px;
+  border-radius: 7px 7px 3px 3px;
+  background: #ece9d8;
+  box-shadow: inset 1px 0 #80adf5, inset -1px 0 #1b69e8, 2px 3px 7px #153f5d55;
+}
+
+:root[data-theme="windows-xp"] .app-content > div > :first-child:has(h1) {
+  min-height: 58px;
+  margin: -20px -20px 20px;
+  padding: 10px 16px;
+  border-radius: 4px 4px 0 0;
+  color: #fff;
+  background: var(--xp-titlebar);
+  border-bottom: 1px solid #003caa;
+}
+
+:root[data-theme="windows-xp"] .app-content > div > :first-child:has(h1) :is(h1, p, svg, [class*="text-muted-foreground"]) {
+  color: #fff;
+}
+
+:root[data-theme="windows-xp"] .app-content > div > :first-child:has(h1) h1 {
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+  font-size: 17px;
+  text-shadow: 1px 1px #003e9f;
+}
+
+:root[data-theme="windows-xp"] .app-content > div > :first-child:has(h1) p {
+  color: #e6f0ff;
+}
+
+:root[data-theme="windows-xp"] .app-content :is([data-slot="card"], div.border[class*="bg-card"], section.border[class*="bg-card"]) {
+  background: #fff;
+  border: 1px solid #a7b5ce;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 #fff;
+}
+
+:root[data-theme="windows-xp"][data-card-style] .app-content :is([data-slot="card"], div.border[class*="bg-card"], section.border[class*="bg-card"]) {
+  background-color: #fff;
+  border-color: #a7b5ce;
+  border-width: 1px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-theme="windows-xp"] [data-slot="card-title"] {
+  color: #16429c;
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+}
+
+:root[data-theme="windows-xp"] [data-slot="card-header"] {
+  border-bottom-color: #d4dce9;
+}
+
+:root[data-theme="windows-xp"] .app-content :is(.rounded-lg, .rounded-xl, .rounded-2xl):not([data-slot="avatar"]) {
+  border-radius: 3px;
+}
+
+/* Opaque classic controls, with the default action outlined in Luna blue. */
+:root[data-theme="windows-xp"] [data-slot="button"] {
+  border-radius: 3px;
+  font-family: Tahoma, Arial, sans-serif;
+  font-weight: 400;
+  text-shadow: none;
+  transition: none;
+}
+
+:root[data-theme="windows-xp"] [data-slot="button"]:is(.bg-primary, .bg-secondary, .border) {
+  border: 1px solid #003c74;
+  color: #222;
+  background: var(--xp-button);
+  box-shadow: inset 1px 1px #fff, inset -1px -1px #d2cec1;
+}
+
+:root[data-theme="windows-xp"] [data-slot="button"].bg-primary {
+  box-shadow: inset 0 0 0 2px #b1cef5, inset 0 0 0 3px #fff;
+}
+
+:root[data-theme="windows-xp"] .app-content > div > :first-child:has(h1) [data-slot="button"]:is(.bg-primary, .bg-secondary, .border) svg {
+  color: currentColor;
+}
+
+:root[data-theme="windows-xp"] [data-slot="button"]:is(.bg-primary, .bg-secondary, .border):hover:not(:disabled) {
+  background: var(--xp-button);
+  box-shadow: inset 0 0 0 2px #f4ca72, inset 0 0 0 3px #fff3ce;
+}
+
+:root[data-theme="windows-xp"] [data-slot="button"]:is(.bg-primary, .bg-secondary, .border):active:not(:disabled) {
+  background: #e3e1d7;
+  box-shadow: inset 1px 1px 2px #ada99b;
+}
+
+:root[data-theme="windows-xp"] [data-slot="button"].bg-destructive {
+  color: #fff;
+  background: linear-gradient(#df775b, #be3528);
+  border: 1px solid #8d241c;
+  box-shadow: inset 1px 1px #f6bc9d;
+}
+
+:root[data-theme="windows-xp"] :is([data-slot="input"], [data-slot="textarea"], textarea, select) {
+  color: #222;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  border-radius: 0;
+  box-shadow: inset 1px 1px 1px #dce2e8;
+}
+
+:root[data-theme="windows-xp"] :is(input, textarea)::placeholder {
+  color: #697688;
+  opacity: 1;
+}
+
+:root[data-theme="windows-xp"] :is(button, a, input, select, textarea, [role="switch"], [role="checkbox"], [role="tab"]):focus-visible {
+  outline: 2px solid #d99000;
+  outline-offset: 2px;
+}
+
+:root[data-theme="windows-xp"] :is(input, textarea)[aria-invalid="true"] {
+  border-color: #bb2828;
+  outline-color: #bb2828;
+}
+
+:root[data-theme="windows-xp"] :is(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+:root[data-theme="windows-xp"] [data-slot="tabs-list"] {
+  gap: 2px;
+  padding: 3px 0 0;
+  border-bottom: 1px solid #919b9c;
+  border-radius: 0;
+  background: transparent;
+}
+
+:root[data-theme="windows-xp"] [data-slot="tabs-trigger"] {
+  color: #30343c;
+  background: linear-gradient(#f9f8f3, #e5e2d6);
+  border: 1px solid #919b9c;
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
+  box-shadow: inset 0 1px #fff;
+  font-weight: 400;
+}
+
+:root[data-theme="windows-xp"] [data-slot="tabs-trigger"][data-state="active"] {
+  color: #111;
+  background: #fff;
+  border-top: 3px solid #e9a636;
+  box-shadow: 0 1px #fff;
+}
+
+:root[data-theme="windows-xp"] [role="switch"] {
+  border: 1px solid #7f9db9;
+  border-radius: 3px;
+  background: linear-gradient(#d4d6ca, #f2f1eb);
+  box-shadow: inset 1px 1px 2px #8b958c;
+}
+
+:root[data-theme="windows-xp"] [role="switch"]:is([data-state="checked"], [aria-checked="true"]) {
+  background: linear-gradient(#7bb766, #3e9235);
+  border-color: #3c7733;
+}
+
+:root[data-theme="windows-xp"] [data-slot="switch-thumb"] {
+  border: 1px solid #8b999f;
+  border-radius: 2px;
+  background: var(--xp-button);
+  box-shadow: inset 1px 1px #fff, 1px 1px 1px #0003;
+}
+
+:root[data-theme="windows-xp"] [role="switch"]:not([data-slot]) > :first-child {
+  border: 1px solid #8b999f;
+  border-radius: 2px;
+  background: var(--xp-button);
+  box-shadow: inset 1px 1px #fff, 1px 1px 1px #0003;
+}
+
+:root[data-theme="windows-xp"] :is(input[type="checkbox"], input[type="radio"], input[type="range"], progress) {
+  accent-color: #358534;
+}
+
+/* Secondary windows, menus and the familiar pale-yellow help balloon. */
+:root[data-theme="windows-xp"] :is([data-slot="dialog-overlay"], .command-palette-overlay) {
+  background: #071b3f55;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  animation: none;
+}
+
+:root[data-theme="windows-xp"] .command-palette-overlay > div:first-child {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-theme="windows-xp"] [data-slot="dialog-content"][role="dialog"] {
+  color: #20252d;
+  background: #ece9d8;
+  border: 3px solid #0855dd;
+  border-radius: 7px 7px 3px 3px;
+  box-shadow: 2px 3px 8px #132b4c66;
+  animation: none;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-window[data-slot="dialog-content"] {
+  background: #ece9d8;
+  border: 3px solid #0855dd;
+  border-radius: 7px 7px 3px 3px;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-window .grid > button {
+  align-items: stretch;
+  border-radius: 3px;
+  background: #fff;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-window .grid > button > div[class*="bg-card/"] {
+  width: 100%;
+  flex: 1;
+  background: #fff;
+  border: 0;
+  border-top: 1px solid #bcc7d8;
+  box-shadow: none;
+}
+
+:root[data-theme="windows-xp"] [data-slot="dialog-title"] {
+  color: #174396;
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+}
+
+:root[data-theme="windows-xp"] [data-slot="dialog-content"] > [data-slot="dialog-header"] {
+  margin: -24px -24px 0;
+  padding: 10px 34px 11px 14px;
+  background: var(--xp-titlebar);
+  border-bottom: 1px solid #003e9e;
+  border-radius: 3px 3px 0 0;
+}
+
+:root[data-theme="windows-xp"] [data-slot="dialog-content"] > [data-slot="dialog-header"] :is([data-slot="dialog-title"], [data-slot="dialog-description"]) {
+  color: #fff;
+}
+
+:root[data-theme="windows-xp"] [data-slot="dialog-content"] > button:last-child:has(> svg) {
+  top: 5px;
+  right: 5px;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #f7b19e, #e05e44 50%, #c72c18);
+  border: 1px solid #fff;
+  border-radius: 3px;
+  box-shadow: inset 1px 1px #ffc7ad;
+  opacity: 1;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-window[data-slot="dialog-content"] > button:last-child {
+  display: none;
+}
+
+:root[data-theme="windows-xp"] :is([data-slot="popover-content"], [data-slot="dropdown-menu-content"], [data-slot="select-content"]) {
+  color: #222;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  border-radius: 0;
+  box-shadow: 2px 2px 2px #0003;
+  animation: none;
+}
+
+:root[data-theme="windows-xp"] [data-slot="tooltip-content"] {
+  color: #25251f;
+  background: #ffffe1;
+  border: 1px solid #666;
+  border-radius: 2px;
+  box-shadow: 2px 2px 1px #0003;
+  animation: none;
+}
+
+:root[data-theme="windows-xp"] [data-slot="tooltip-content"] svg {
+  background: #ffffe1;
+  fill: #ffffe1;
+}
+
+:root[data-theme="windows-xp"] .command-palette-window {
+  color: #222;
+  background: #ece9d8;
+  border: 3px solid #0855dd;
+  border-top-width: 1px;
+  border-radius: 7px 7px 3px 3px;
+  box-shadow: 3px 5px 12px #071a4470;
+  animation: none;
+}
+
+:root[data-theme="windows-xp"] .command-palette-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 33px;
+  padding: 5px 9px;
+  color: #fff;
+  background: var(--xp-titlebar);
+  border-bottom: 1px solid #003caa;
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 1px 1px #003b9f;
+}
+
+:root[data-theme="windows-xp"] .command-palette-titlebar button {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #f7b19e, #e05e44 50%, #c72c18);
+  box-shadow: inset 1px 1px #ffc7ad;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-titlebar {
+  padding: 10px 42px 12px 14px;
+  color: #fff;
+  background: var(--xp-titlebar);
+  border-radius: 3px 3px 0 0;
+  border-bottom: 1px solid #003caa;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-titlebar [data-slot="dialog-title"] {
+  color: #fff;
+  font-size: 16px;
+  text-shadow: 1px 1px #003b9f;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-titlebar [data-slot="dialog-description"] {
+  color: #e6f0ff;
+  font-size: 12px;
+}
+
+:root[data-theme="windows-xp"] .theme-picker-titlebar button[data-window-action="close"] {
+  top: 9px;
+  right: 9px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  opacity: 1;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #f7b19e, #e05e44 50%, #c72c18);
+  box-shadow: inset 1px 1px #ffc7ad;
+}
+
+:root[data-theme="windows-xp"] .command-palette-search {
+  margin: 12px;
+  padding-inline: 10px;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  box-shadow: inset 1px 1px 1px #dce2e8;
+}
+
+:root[data-theme="windows-xp"] .command-palette-search [cmdk-input] {
+  height: 36px;
+  min-width: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+:root[data-theme="windows-xp"] .command-palette-window [cmdk-list] {
+  margin: 0 12px 12px;
+  background: #fff;
+  border: 1px solid #7f9db9;
+  padding: 4px;
+}
+
+:root[data-theme="windows-xp"] .command-palette-window [cmdk-group-heading] {
+  margin-block: 4px;
+  color: #215dc6;
+  background: #eaf0fc;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root[data-theme="windows-xp"] .command-palette-window [cmdk-item] {
+  border: 1px solid transparent;
+  border-radius: 0;
+  padding-block: 6px;
+}
+
+:root[data-theme="windows-xp"] .command-palette-window [cmdk-item][data-selected="true"] {
+  color: #fff;
+  background: #316ac5;
+  border-color: #2458a6;
+}
+
+:root[data-theme="windows-xp"] .command-palette-window [cmdk-item][data-selected="true"] svg {
+  color: #fff;
+}
+
+/* Status colors were tuned for the other themes' dark surfaces. */
+:root[data-theme="windows-xp"] :is(.text-green-400, .text-green-500, .text-emerald-400) {
+  color: #28732c;
+}
+
+:root[data-theme="windows-xp"] :is(.text-yellow-400, .text-yellow-500, .text-amber-400) {
+  color: #8a5800;
+}
+
+:root[data-theme="windows-xp"] :is(.text-red-400, .text-red-500, .text-rose-400) {
+  color: #b52623;
+}
+
+:root[data-theme="windows-xp"] :is(.text-blue-400, .text-cyan-400, .text-sky-400) {
+  color: #1757a5;
+}
+
+:root[data-theme="windows-xp"] :is(.text-purple-400, .text-violet-400, .text-pink-400) {
+  color: #834296;
+}
+
+:root[data-theme="windows-xp"] ::selection {
+  color: #fff;
+  background: #316ac5;
+}
+
+:root[data-theme="windows-xp"] ::-webkit-scrollbar {
+  width: 13px;
+  height: 13px;
+}
+
+:root[data-theme="windows-xp"] ::-webkit-scrollbar-track {
+  background: repeating-linear-gradient(45deg, #f1efe2, #f1efe2 2px, #faf9f3 2px, #faf9f3 4px);
+  border-left: 1px solid #d1d5db;
+}
+
+:root[data-theme="windows-xp"] ::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #e6efff, #b9cdf3);
+  border: 1px solid #7f9db9;
+  border-radius: 2px;
+  box-shadow: inset 1px 1px #fff;
+}
+
+:root[data-theme="windows-xp"] ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #eaf2ff, #a1bdee);
+}
+
+:root[data-theme="windows-xp"] ::-webkit-scrollbar-corner {
+  background: #ece9d8;
+}
+
+/* The taskbar is real navigation: Start opens the existing command palette. */
+:root[data-theme="windows-xp"] .xp-taskbar {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 34px;
+  color: #fff;
+  background: linear-gradient(#3f8cf3 0%, #2875e5 9%, #245edb 20%, #245edb 85%, #1d4db8);
+  box-shadow: inset 0 1px #86baff;
+  font-family: Tahoma, Arial, sans-serif;
+  user-select: none;
+}
+
+:root[data-theme="windows-xp"] .xp-start-button {
+  display: flex;
+  height: 34px;
+  min-width: 118px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 21px 2px 12px;
+  border: 0;
+  border-radius: 0 14px 14px 0;
+  color: #fff;
+  background: linear-gradient(#85c581 0%, #4b9c48 10%, #398b34 32%, #2d8a2c 75%, #1b611d);
+  box-shadow: inset 0 1px #b9deb1, inset -2px 0 3px #18531e, 1px 0 1px #154d8e;
+  font-family: 'Trebuchet MS', Tahoma, sans-serif;
+  font-size: 20px;
+  font-style: italic;
+  font-weight: 700;
+  text-shadow: 1px 2px #204f22;
+}
+
+:root[data-theme="windows-xp"] .xp-start-button:hover {
+  filter: brightness(1.1);
+}
+
+:root[data-theme="windows-xp"] .xp-start-button:active {
+  background: linear-gradient(#1f6223, #42943b);
+  box-shadow: inset 2px 2px 4px #163c19;
+}
+
+:root[data-theme="windows-xp"] .xp-start-button :is(img, .theme-icon) {
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+:root[data-theme="windows-xp"] .xp-taskbar-app {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 200px;
+  height: 26px;
+  padding: 0 10px;
+  overflow: hidden;
+  color: #fff;
+  background: #1650b8;
+  border: 1px solid #103f94;
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 2px #083888, 1px 1px #5b93eb;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root[data-theme="windows-xp"] .xp-taskbar-app:hover {
+  background: #2262ce;
+}
+
+:root[data-theme="windows-xp"] .xp-taskbar-app :is(img, .theme-icon) {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+:root[data-theme="windows-xp"] .xp-tray {
+  display: flex;
+  height: 34px;
+  margin-left: auto;
+  align-items: center;
+  gap: 9px;
+  padding: 0 16px;
+  color: #fff;
+  background: linear-gradient(#2fa8f2, #0e91e4 20%, #0a8bde 85%, #0875c3);
+  border-left: 1px solid #0a58bc;
+  box-shadow: inset 1px 0 #65bafb, inset 0 1px #8ed2ff;
+  font-size: 11px;
+}
+
+:root[data-theme="windows-xp"] .xp-tray :is(img, .theme-icon, svg) {
+  width: 18px;
+  height: 18px;
+}
+
+:root[data-theme="windows-xp"] .settings-savebar {
+  bottom: 50px;
+}
+
+:root[data-theme="windows-xp"] .settings-savebar > div {
+  background: #ece9d8;
+  border-color: #7f9db9;
+  border-radius: 3px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (max-width: 1100px) {
+  :root[data-theme="windows-xp"] .app-content {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="windows-xp"] *,
+  :root[data-theme="windows-xp"] *::before,
+  :root[data-theme="windows-xp"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

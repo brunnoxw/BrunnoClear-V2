@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import '../styles/windows-xp.css';
+@import '../styles/my-little-pony.css';
+@import '../styles/theme-gallery.css';
+
+.theme-icon-xp,
+.theme-xp-only {
+  display: none;
+}
 
 /* Geist Fonts (local, sem dependência de rede) */
 @font-face {

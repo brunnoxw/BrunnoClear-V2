@@ -7,6 +7,16 @@ import { getTema, type ThemeDefinition } from '@/lib/themes'
 
 const COR_PADRAO = '#ffffff'
 
+function limparDetalhesTema() {
+  const root = document.documentElement
+  root.removeAttribute('data-theme-family')
+  root.removeAttribute('data-pony')
+  root.removeAttribute('data-pony-effect')
+  for (const property of Array.from(root.style)) {
+    if (property.startsWith('--pony-')) root.style.removeProperty(property)
+  }
+}
+
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   if (!result) return null
@@ -48,6 +58,7 @@ export function aplicarCorPainel(cor: string) {
 export function aplicarTema(tema: ThemeDefinition) {
   const root = document.documentElement
   const c = tema.cores
+  limparDetalhesTema()
 
   root.style.setProperty('--background', c.background)
   root.style.setProperty('--foreground', c.foreground)
@@ -99,6 +110,12 @@ export function aplicarTema(tema: ThemeDefinition) {
   }
 
   root.setAttribute('data-theme', tema.id)
+  if (tema.family) root.setAttribute('data-theme-family', tema.family)
+  if (tema.character) root.setAttribute('data-pony', tema.character)
+  if (tema.effect) root.setAttribute('data-pony-effect', tema.effect)
+  for (const [property, value] of Object.entries(tema.cssVars ?? {})) {
+    if (property.startsWith('--pony-')) root.style.setProperty(property, value)
+  }
   if (tema.backgroundImage) {
     root.style.setProperty('--theme-bg-image', `url(${tema.backgroundImage})`)
     root.style.setProperty('--theme-bg-opacity', String(tema.backgroundOpacity ?? 0.03))
@@ -120,6 +137,7 @@ export function aplicarTema(tema: ThemeDefinition) {
 
 export function resetarTema() {
   const root = document.documentElement
+  limparDetalhesTema()
   root.setAttribute('data-theme', 'padrao')
   const props = [
     '--background', '--foreground', '--card', '--card-foreground',

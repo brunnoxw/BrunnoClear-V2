@@ -25,6 +25,7 @@ import { aplicarCorPainel, aplicarAparencia, aplicarTema, resetarTema } from "@/
 import { TEMAS, getTema } from "@/lib/themes"
 import { ColorPicker } from "@/components/ui/color-picker"
 import { ThemePickerModal } from "@/components/theme-picker-modal"
+import { ThemedIcon } from "@/components/themed-icon"
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -134,8 +135,12 @@ export default function PaginaConfiguracoes() {
     }
   }
 
-  const Toggle = ({ ativado, aoAlternar }: { ativado: boolean; aoAlternar: () => void }) => (
+  const Toggle = ({ ativado, aoAlternar, label }: { ativado: boolean; aoAlternar: () => void; label: string }) => (
     <button
+      type="button"
+      role="switch"
+      aria-checked={ativado}
+      aria-label={label}
       onClick={aoAlternar}
       className={`relative h-6 w-11 rounded-full transition-colors ${
         ativado ? "bg-primary" : "bg-secondary"
@@ -167,7 +172,7 @@ export default function PaginaConfiguracoes() {
       <div className="rounded-xl border border-border bg-card/40 p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/10">
-            <Palette size={18} className="text-purple-400" />
+            <ThemedIcon name="appearance" size={24}><Palette size={18} className="text-purple-400" /></ThemedIcon>
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">Aparência</h2>
@@ -317,6 +322,7 @@ export default function PaginaConfiguracoes() {
               </div>
             </div>
             <Toggle
+              label="Grade de fundo"
               ativado={settings.aparencia?.mostrarGrade ?? true}
               aoAlternar={() => updateAparencia("mostrarGrade", !settings.aparencia?.mostrarGrade)}
             />
@@ -327,7 +333,7 @@ export default function PaginaConfiguracoes() {
       <div className="rounded-xl border border-border bg-card/40 p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-            <Wrench size={18} className="text-primary" />
+            <ThemedIcon name="settings" size={24}><Wrench size={18} className="text-primary" /></ThemedIcon>
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">Ferramentas</h2>
@@ -342,6 +348,7 @@ export default function PaginaConfiguracoes() {
               <p className="text-xs text-muted-foreground">Aguarda a resposta da API antes de continuar</p>
             </div>
             <Toggle
+              label="Aguardar Fetch"
               ativado={settings.aguardarFetch ?? true}
               aoAlternar={() => setSettings((s) => ({ ...s, aguardarFetch: !s.aguardarFetch }))}
             />
@@ -414,7 +421,7 @@ export default function PaginaConfiguracoes() {
       <div className="rounded-xl border border-border bg-card/40 p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10">
-            <Monitor size={18} className="text-blue-400" />
+            <ThemedIcon name="computer" size={24}><Monitor size={18} className="text-blue-400" /></ThemedIcon>
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">Sistema</h2>
@@ -436,6 +443,7 @@ export default function PaginaConfiguracoes() {
               </div>
             </div>
             <Toggle
+              label="Notificações"
               ativado={settings.general?.notifications ?? true}
               aoAlternar={() => updateGeneral("notifications", !settings.general?.notifications)}
             />
@@ -447,6 +455,7 @@ export default function PaginaConfiguracoes() {
               <p className="text-xs text-muted-foreground">Ao fechar, minimiza para a bandeja do sistema</p>
             </div>
             <Toggle
+              label="Minimizar para a bandeja"
               ativado={settings.general?.minimizeToTray ?? true}
               aoAlternar={() => updateGeneral("minimizeToTray", !settings.general?.minimizeToTray)}
             />
@@ -474,7 +483,7 @@ export default function PaginaConfiguracoes() {
       <div className="rounded-xl border border-border bg-card/40 p-6">
         <div className="mb-5 flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10">
-            <HardDrive size={18} className="text-orange-400" />
+            <ThemedIcon name="folder" size={24}><HardDrive size={18} className="text-orange-400" /></ThemedIcon>
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">Armazenamento</h2>
@@ -597,7 +606,7 @@ export default function PaginaConfiguracoes() {
       </div>
 
       <div
-        className={`fixed bottom-6 left-64 right-0 z-50 flex justify-center pointer-events-none transition-all duration-300 ease-out ${
+        className={`settings-savebar fixed bottom-6 left-64 right-0 z-50 flex justify-center pointer-events-none transition-all duration-300 ease-out ${
           hasChanges ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"
         }`}
       >

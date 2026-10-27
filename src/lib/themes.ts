@@ -1,3 +1,5 @@
+import { getPonyTheme } from './pony-themes'
+
 export interface ThemeColors {
   background: string
   foreground: string
@@ -42,6 +44,10 @@ export interface ThemeDefinition {
   scrollbarTrack?: string
   scrollbarThumb?: string
   scrollbarThumbHover?: string
+  family?: 'my-little-pony'
+  character?: string
+  effect?: string
+  cssVars?: Record<string, string>
 }
 
 const TEMA_PADRAO: ThemeDefinition = {
@@ -417,8 +423,54 @@ const TEMA_BRUNNO: ThemeDefinition = {
   scrollbarThumbHover: '#4a453e',
 }
 
+const TEMA_WINDOWS_XP: ThemeDefinition = {
+  id: 'windows-xp',
+  nome: 'Windows XP',
+  descricao: 'Luna azul, ícones clássicos e o verde do Bliss. Bem-vindo de volta.',
+  previewColors: ['#245edb', '#ece9d8', '#3c8d2f'],
+  cores: {
+    background: '#ece9d8',
+    foreground: '#1f2937',
+    card: '#ffffff',
+    cardForeground: '#1f2937',
+    popover: '#ffffff',
+    popoverForeground: '#1f2937',
+    primary: '#245edb',
+    primaryForeground: '#ffffff',
+    secondary: '#e5e9f2',
+    secondaryForeground: '#1f2937',
+    muted: '#e5e3d5',
+    mutedForeground: '#5b6270',
+    accent: '#dbe8ff',
+    accentForeground: '#123b83',
+    destructive: '#bd3022',
+    destructiveForeground: '#ffffff',
+    border: '#aca899',
+    input: '#7f9db9',
+    ring: '#245edb',
+    sidebar: '#d6dff7',
+    sidebarForeground: '#173c78',
+    sidebarPrimary: '#245edb',
+    sidebarPrimaryForeground: '#ffffff',
+    sidebarAccent: '#c1d2ee',
+    sidebarAccentForeground: '#123b83',
+    sidebarBorder: '#7c9cce',
+    sidebarRing: '#245edb',
+  },
+  scrollbarTrack: '#f1efe2',
+  scrollbarThumb: '#c5d5f5',
+  scrollbarThumbHover: '#a7bfee',
+}
+
 export const TEMAS: ThemeDefinition[] = [
   TEMA_PADRAO,
+  {
+    ...getPonyTheme('twilight-sparkle')!,
+    id: 'my-little-pony',
+    nome: 'My Little Pony',
+    descricao: 'Escolha seu pônei. Descubra um universo com a sua personalidade.',
+  },
+  TEMA_WINDOWS_XP,
   TEMA_BRUNNO,
   TEMA_SPONGEBOB,
   TEMA_HELLO_KITTY,
@@ -430,5 +482,5 @@ export const TEMAS: ThemeDefinition[] = [
 ]
 
 export function getTema(id: string): ThemeDefinition | undefined {
-  return TEMAS.find((t) => t.id === id)
+  return TEMAS.find((t) => t.id === id) ?? (id.startsWith('mlp-') ? getPonyTheme(id) : undefined)
 }

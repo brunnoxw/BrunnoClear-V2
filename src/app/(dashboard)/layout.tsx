@@ -8,6 +8,7 @@ import { Onboarding } from "@/components/layout/onboarding"
 import { UpdateBanner } from "@/components/layout/update-banner"
 import { WhatsNew } from "@/components/layout/whats-new"
 import { CommandPalette } from "@/components/layout/command-palette"
+import { XpTaskbar } from "@/components/layout/xp-taskbar"
 import { api } from "@/lib/api-client"
 import { useCorPainel } from "@/hooks/use-cor-painel"
 import { useRpcPresence } from "@/hooks/use-rpc"
@@ -71,10 +72,10 @@ export default function LayoutDashboard() {
     <div className="relative min-h-screen bg-background">
       <FundoBloom />
       <Sidebar />
-      <main className="relative z-10 ml-64 h-screen overflow-y-auto overflow-x-hidden">
+      <main className="app-main relative z-10 ml-64 h-screen overflow-y-auto overflow-x-hidden">
         <NavegacaoSuperior />
         <UpdateBanner />
-        <div className="p-6">
+        <div className="app-content p-6">
           <ErrorBoundary key={location.pathname}>
             <Outlet />
           </ErrorBoundary>
@@ -82,6 +83,7 @@ export default function LayoutDashboard() {
       </main>
       <WhatsNew />
       <CommandPalette />
+      <XpTaskbar />
     </div>
   )
 }

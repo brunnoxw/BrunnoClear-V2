@@ -58,6 +58,9 @@ import {
 } from "@/components/ui/tooltip"
 import { useTokens } from "@/hooks/use-tokens"
 import { AddAccountModal } from "./add-account-modal"
+import { ThemedIcon } from "@/components/themed-icon"
+import { XP_SECTION_ICONS, xpIconForRoute } from "@/lib/xp-icons"
+import { PonyCompanion } from './pony-atmosphere'
 
 interface ItemMenu {
   titulo: string
@@ -167,7 +170,7 @@ function AppVersion() {
     }).catch(() => {})
   }, [])
   return (
-    <span className="self-start rounded border border-primary/15 bg-primary/5 px-1.5 py-0.5 font-mono text-[9px] font-medium leading-none text-muted-foreground">
+    <span className="app-version self-start rounded border border-primary/15 bg-primary/5 px-1.5 py-0.5 font-mono text-[9px] font-medium leading-none text-muted-foreground">
       v{version}
     </span>
   )
@@ -269,9 +272,9 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-border bg-sidebar">
+      <aside className="app-sidebar fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-border bg-sidebar">
         <div
-          className="relative flex h-16 shrink-0 select-none items-center gap-3 border-b border-border bg-background/90 px-5"
+          className="app-brand relative flex h-16 shrink-0 select-none items-center gap-3 border-b border-border bg-background/90 px-5"
           style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         >
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-primary/20 to-primary/25" />
@@ -284,29 +287,31 @@ export function Sidebar() {
             />
           </div>
           <div className="flex min-w-0 flex-col gap-1.5">
-            <span className="text-[15px] font-semibold leading-none tracking-tight text-foreground">
+            <span className="app-brand-name text-[15px] font-semibold leading-none tracking-tight text-foreground">
               BrunnoClear
             </span>
             <AppVersion />
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+        <nav className="app-sidebar-nav flex-1 overflow-y-auto px-3 py-4 space-y-1" aria-label="Menu principal">
           {secoesMenu.map((secao) => {
             const aberta = secao.alwaysOpen || !!secoesAbertas[secao.titulo]
             return (
-              <div key={secao.titulo}>
+              <div key={secao.titulo} className="app-nav-section">
                 {secao.alwaysOpen ? (
-                  <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold tracking-wide text-muted-foreground">
-                    <span className="text-muted-foreground/70">{secao.icone}</span>
+                  <div className="app-section-label flex items-center gap-2 px-3 py-2 text-xs font-semibold tracking-wide text-muted-foreground">
+                    <ThemedIcon name={XP_SECTION_ICONS[secao.titulo]} className="text-muted-foreground/70">{secao.icone}</ThemedIcon>
                     <span>{secao.titulo}</span>
                   </div>
                 ) : (
                   <button
+                    type="button"
+                    aria-expanded={aberta}
                     onClick={() => toggleSecao(secao.titulo)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold tracking-wide text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors"
+                    className="app-section-toggle flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold tracking-wide text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors"
                   >
-                    <span className="text-muted-foreground/70">{secao.icone}</span>
+                    <ThemedIcon name={XP_SECTION_ICONS[secao.titulo]} className="text-muted-foreground/70">{secao.icone}</ThemedIcon>
                     <span className="flex-1 text-left">{secao.titulo}</span>
                     <ChevronDown
                       size={14}
@@ -331,16 +336,17 @@ export function Sidebar() {
                         <li key={item.titulo}>
                           <Link
                             to={item.href}
+                            aria-current={estaAtivo ? "page" : undefined}
                             className={cn(
-                              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                              "app-nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
                               estaAtivo
                                 ? "bg-primary/10 text-primary borda-neon"
                                 : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                             )}
                           >
-                            <span className={cn(estaAtivo && "text-primary")}>
+                            <ThemedIcon name={xpIconForRoute(item.href)} className={cn(estaAtivo && "text-primary")}>
                               {item.icone}
-                            </span>
+                            </ThemedIcon>
                             <span className="flex-1">{item.titulo}</span>
                           </Link>
                         </li>
@@ -353,7 +359,8 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className="border-t border-border p-3">
+        <PonyCompanion />
+        <div className="app-account-panel border-t border-border p-3">
           {contaAtiva ? (
             <div>
               <div

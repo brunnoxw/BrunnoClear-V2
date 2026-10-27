@@ -1,3 +1,5 @@
+import { PonyAtmosphere } from './pony-atmosphere'
+
 export function FundoBloom() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -19,6 +21,7 @@ export function FundoBloom() {
       />
 
       <div className="theme-bg-overlay absolute inset-0" />
+      <PonyAtmosphere />
     </div>
   )
 }
