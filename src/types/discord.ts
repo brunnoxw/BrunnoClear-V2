@@ -26,6 +26,30 @@ export interface DiscordGuild {
   features: string[]
 }
 
+export interface DiscordMember {
+  id: string
+  username: string
+  global_name?: string | null
+  discriminator: string
+  avatar: string | null
+  avatarUrl?: string | null
+  nickname?: string | null
+  bot?: boolean
+  joined_at?: string
+}
+
+export interface MiniProfile {
+  id: string
+  username: string
+  globalName?: string | null
+  avatarUrl: string | null
+  bot: boolean
+  createdAt: string
+  badges: Badge[]
+  premiumType: number
+  mutualGuilds: number
+}
+
 export interface DiscordChannel {
   id: string
   type: number

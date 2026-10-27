@@ -58,6 +58,8 @@ class ApiClient {
   checkToken(id: string) { return this.post(`/tokens/${id}/check`) }
   getTokenGuilds(id: string) { return this.get(`/tokens/${id}/guilds`) }
   getGuildChannels(tokenId: string, guildId: string) { return this.get(`/tokens/${tokenId}/guilds/${guildId}/channels`) }
+  getGuildMember(tokenId: string, guildId: string, userId: string) { return this.get(`/tokens/${tokenId}/guilds/${guildId}/members/${userId}`) }
+  getMiniProfile(tokenId: string, userId: string) { return this.get(`/tokens/${tokenId}/users/${userId}/mini-profile`) }
   getTokenDms(id: string) { return this.get(`/tokens/${id}/dms`) }
   getTokenFriends(id: string) { return this.get(`/tokens/${id}/friends`) }
   hasAccounts() { return this.get<{ hasAccounts: boolean; count: number }>('/tokens/has-accounts') }

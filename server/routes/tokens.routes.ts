@@ -818,4 +818,64 @@ router.get('/:id/guilds/:guildId/channels', async (req, res) => {
   }
 })
 
+/**
+ * Busca UM único membro de um servidor pelo id (fetch leve).
+ * Usado para validar/enriquecer (foto + nome) um id colado pelo usuário.
+ */
+router.get('/:id/guilds/:guildId/members/:userId', async (req, res) => {
+  const token = storage.getTokenById(req.params.id)
+  if (!token) {
+    res.status(404).json({ success: false, error: 'Token não encontrada', timestamp: new Date().toISOString() })
+    return
+  }
+  if (!discord.isConnected() || discord.getActiveToken() !== token.token) {
+    res.status(400).json({ success: false, error: 'Conta não está conectada.', timestamp: new Date().toISOString() })
+    return
+  }
+  try {
+    const member = await discord.getGuildMember(req.params.guildId, req.params.userId)
+    res.json({ success: true, data: member, timestamp: new Date().toISOString() })
+  } catch (err: any) {
+    res.status(404).json({ success: false, error: 'Usuário não encontrado neste servidor', timestamp: new Date().toISOString() })
+  }
+})
+
+/**
+ * Perfil rápido de um usuário qualquer (foto, nome, badges, idade da conta,
+ * servidores em comum). Usado para prévia do alvo ao colar um id.
+ */
+router.get('/:id/users/:userId/mini-profile', async (req, res) => {
+  const token = storage.getTokenById(req.params.id)
+  if (!token) {
+    res.status(404).json({ success: false, error: 'Token não encontrada', timestamp: new Date().toISOString() })
+    return
+  }
+  if (!discord.isConnected() || discord.getActiveToken() !== token.token) {
+    res.status(400).json({ success: false, error: 'Conta não está conectada.', timestamp: new Date().toISOString() })
+    return
+  }
+  try {
+    const base = await discord.getUserProfile(req.params.userId) as any
+    const extra = await discord.fetchUserProfile(req.params.userId, token.token, true)
+    const badges = extra ? processProfileBadges(extra.badges, extra.premium_since, extra.premium_guild_since) : []
+    res.json({
+      success: true,
+      data: {
+        id: base.id,
+        username: base.username,
+        globalName: base.globalName ?? null,
+        avatarUrl: base.avatar,
+        bot: !!base.bot,
+        createdAt: base.created_at,
+        badges,
+        premiumType: extra?.premium_type ?? 0,
+        mutualGuilds: extra?.mutual_guilds ?? 0,
+      },
+      timestamp: new Date().toISOString(),
+    })
+  } catch (err: any) {
+    res.status(404).json({ success: false, error: 'Usuário não encontrado', timestamp: new Date().toISOString() })
+  }
+})
+
 export default router

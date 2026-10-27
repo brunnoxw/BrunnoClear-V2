@@ -1,6 +1,6 @@
 import { config } from '../config'
 import { logger } from '../core/logger'
-import type { DiscordUser, DiscordGuild, DiscordChannel, DiscordMessage } from '../../src/types/discord'
+import type { DiscordUser, DiscordGuild, DiscordChannel, DiscordMessage, DiscordMember } from '../../src/types/discord'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { Client } = require('discord.js-selfbot-v13')
@@ -104,16 +104,18 @@ class DiscordService {
     return await res.json() as T
   }
 
-  async fetchUserProfile(userId: string, token: string): Promise<{
+  async fetchUserProfile(userId: string, token: string, withMutualGuilds = false): Promise<{
     badges: Array<{ id: string; description: string; icon: string; link?: string }>
     premium_type: number
     premium_since: string | null
     premium_guild_since: string | null
     connected_accounts?: Array<{ type: string; name: string; id: string }>
+    mutual_guilds?: number
     user?: { bio?: string; banner?: string; accent_color?: number }
   } | null> {
     try {
-      const res = await fetch(`${DISCORD_API}/users/${userId}/profile`, {
+      const qs = withMutualGuilds ? '?with_mutual_guilds=true' : ''
+      const res = await fetch(`${DISCORD_API}/users/${userId}/profile${qs}`, {
         headers: { Authorization: token },
       })
       if (!res.ok) {
@@ -137,6 +139,7 @@ class DiscordService {
           name: a.name,
           id: a.id,
         })),
+        mutual_guilds: Array.isArray(data.mutual_guilds) ? data.mutual_guilds.length : 0,
         user: data.user_profile ? {
           bio: data.user_profile.bio || undefined,
           banner: data.user?.banner || undefined,
@@ -426,11 +429,31 @@ class DiscordService {
     return members.map((m: any) => ({
       id: m.id,
       username: m.user.username,
+      global_name: m.user.globalName ?? null,
       discriminator: m.user.discriminator,
       avatar: m.user.avatar,
+      avatarUrl: m.user.displayAvatarURL?.({ format: 'png', size: 64 }) ?? null,
       nickname: m.nickname,
+      bot: !!m.user.bot,
       joined_at: m.joinedAt?.toISOString(),
     }))
+  }
+
+  /** Busca UM único membro de um servidor pelo id (fetch leve, 1 usuário). */
+  async getGuildMember(guildId: string, userId: string): Promise<DiscordMember> {
+    const client = this.getClient()
+    const guild = await client.guilds.fetch(guildId)
+    const m = await guild.members.fetch(userId)
+    return {
+      id: m.id,
+      username: m.user.username,
+      global_name: m.user.globalName ?? null,
+      discriminator: m.user.discriminator,
+      avatar: m.user.avatar,
+      avatarUrl: m.user.displayAvatarURL?.({ format: 'png', size: 64 }) ?? null,
+      nickname: m.nickname,
+      bot: !!m.user.bot,
+    }
   }
 
   async getUserProfile(userId: string): Promise<unknown> {
